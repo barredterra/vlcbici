@@ -291,6 +291,18 @@ button:disabled {
   color: #9b1c1c;
 }
 
+.popup-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Big enough to tap. */
+.popup-actions button {
+  flex: 1;
+  min-height: 36px;
+}
+
 .popup-stats.stale .popup-stat {
   background: #f3f4f6;
   color: #9ca3af;
@@ -299,8 +311,8 @@ button:disabled {
 /* Icon inside the round map pin of the pickup and return stations. */
 .pin-icon {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .station-text {

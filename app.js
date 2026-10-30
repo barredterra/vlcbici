@@ -132,6 +132,12 @@ function chooseDropoffStation(stations, destination, now) {
   return nearestStation(candidates, destination);
 }
 
+function findStation(stations, id) {
+  return stations.find(function (s) {
+    return s.id === id;
+  });
+}
+
 // A bike only helps when walking to and from the stations is shorter than walking directly.
 function shouldWalkOnly(start, destination, pickup, dropoff) {
   if (pickup.id === dropoff.id) return true;
@@ -410,6 +416,10 @@ map.attributionControl.addAttribution(
     ' | Routing: <a href="https://routing.openstreetmap.de/">FOSSGIS OSRM</a>',
 );
 
+// Stations sit below the route lines (overlayPane is 400). The canvas tolerance
+// makes each circle easier to hit with a finger than it looks.
+map.createPane("stations").style.zIndex = 390;
+const stationRenderer = L.canvas({ pane: "stations", tolerance: 8 });
 const stationLayer = L.layerGroup().addTo(map);
 const pointLayer = L.layerGroup().addTo(map);
 const routeLayer = L.featureGroup().addTo(map);
@@ -449,17 +459,17 @@ function pinIcon(content, colour) {
   return L.divIcon({
     className: "",
     html:
-      '<div style="width:26px;height:26px;border-radius:50%;background:' +
+      '<div style="width:30px;height:30px;border-radius:50%;background:' +
       colour +
-      ";color:#fff;font:bold 13px system-ui,sans-serif;" +
+      ";color:#fff;font:bold 14px system-ui,sans-serif;" +
       // Flex centres both letters and icons inside the border (the page uses border-box).
       "display:flex;align-items:center;justify-content:center;" +
       'border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">' +
       content +
       "</div>",
-    iconSize: [26, 26],
-    iconAnchor: [13, 13],
-    popupAnchor: [0, -13],
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+    popupAnchor: [0, -15],
   });
 }
 
@@ -518,19 +528,34 @@ function stationPopup(station, role) {
     "</div>" +
     '<div class="popup-status">' +
     status +
+    "</div>" +
+    // Handled in onStationButtonClick. They help when a station hides the spot to click.
+    '<div class="popup-actions">' +
+    '<button type="button" data-use-station="start" data-station-id="' +
+    station.id +
+    '">Start</button>' +
+    '<button type="button" data-use-station="destination" data-station-id="' +
+    station.id +
+    '">Destination</button>' +
     "</div>"
   );
 }
 
+// The stations on the map, for the Start/Destination buttons in their popups.
+let shownStations = [];
+
 function drawStations(stations) {
   const now = Date.now();
+  shownStations = stations;
   stationLayer.clearLayers();
   stations.forEach(function (station) {
     const colour = stationColour(station, now);
     const marker = L.circleMarker([station.lat, station.lon], {
-      radius: 5,
+      pane: "stations",
+      renderer: stationRenderer,
+      radius: 7,
       color: "#fff",
-      weight: 1,
+      weight: 2,
       fillColor: colour,
       fillOpacity: 0.9,
       bubblingMouseEvents: false, // clicking a station must not set start/destination
@@ -570,6 +595,29 @@ function setDestination(point) {
   destPoint = point;
   destInput.value = pointText(point);
   drawPoints();
+}
+
+// A station as start means "pick up the bike here", as destination "return it here".
+function onStationButtonClick(event) {
+  const button = event.target.closest("[data-use-station]");
+  if (!button || planButton.disabled) return;
+  const station = findStation(shownStations, Number(button.dataset.stationId));
+  const point = {
+    lat: station.lat,
+    lon: station.lon,
+    label: station.address,
+    stationId: station.id,
+  };
+  const text = "Station " + station.id + ": " + station.address;
+  if (button.dataset.useStation === "start") {
+    startPoint = point;
+    startInput.value = text;
+  } else {
+    destPoint = point;
+    destInput.value = text;
+  }
+  drawPoints();
+  map.closePopup();
 }
 
 function onMapClick(event) {
@@ -634,6 +682,12 @@ function showLiveLocation(position) {
     interactive: false,
     zIndexOffset: 500,
   }).addTo(map);
+}
+
+function livePosition() {
+  if (!liveLocationMarker) return null;
+  const latLng = liveLocationMarker.getLatLng();
+  return { lat: latLng.lat, lon: latLng.lng, label: "Your location" };
 }
 
 function watchLiveLocation() {
@@ -756,27 +810,27 @@ function renderSummary(legs, start, destination, pickup, dropoff) {
   if (destination.label)
     html +=
       '<div class="place">To: ' + escapeHtml(destination.label) + "</div>";
-  if (pickup) {
-    // Legs are walk, bike, walk: the station cards go between them.
+  // The station cards frame the bike leg. A trip can lack the first or last walk.
+  legs.forEach(function (leg) {
+    if (leg.mode !== "bike") {
+      html += legHtml(leg);
+      return;
+    }
     html +=
-      legHtml(legs[0]) +
       stationCardHtml(
         BIKE_ICON,
         "Pick up a bike",
         pickup,
         pickup.bikes + " bikes",
       ) +
-      legHtml(legs[1]) +
+      legHtml(leg) +
       stationCardHtml(
         PARKING_ICON,
         "Return the bike",
         dropoff,
         dropoff.docks + " free docks",
-      ) +
-      legHtml(legs[2]);
-  } else {
-    html += legs.map(legHtml).join("");
-  }
+      );
+  });
   html +=
     '<div class="total">Total: ' +
     formatKm(totalDistance) +
@@ -816,9 +870,14 @@ async function planRoute(event) {
     if (!isNearNetwork(stations, destination))
       throw new Error("The destination is outside the Valenbisi area.");
 
+    // A station picked with its popup button wins over the nearest one.
     const now = Date.now();
-    const pickup = choosePickupStation(stations, start, now);
-    const dropoff = chooseDropoffStation(stations, destination, now);
+    const pickup = start.stationId
+      ? findStation(stations, start.stationId)
+      : choosePickupStation(stations, start, now);
+    const dropoff = destination.stationId
+      ? findStation(stations, destination.stationId)
+      : chooseDropoffStation(stations, destination, now);
     if (!pickup)
       throw new Error(
         "No open station with " + MIN_BIKES + "+ bikes available right now.",
@@ -827,9 +886,31 @@ async function planRoute(event) {
       throw new Error(
         "No open station with " + MIN_DOCKS + "+ free docks right now.",
       );
+    if (start.stationId && destination.stationId && pickup.id === dropoff.id)
+      throw new Error("Start and destination are the same station.");
+
+    // Picked stations are the user's choice: warn about low counts, do not replace them.
+    const warnings = [];
+    if (start.stationId && pickup.bikes < MIN_BIKES)
+      warnings.push("The start station has only " + pickup.bikes + " bikes.");
+    if (destination.stationId && dropoff.docks < MIN_DOCKS)
+      warnings.push(
+        "The destination station has only " + dropoff.docks + " free docks.",
+      );
+
+    // From a start station, walk there from the live location, when it is known and nearby.
+    let origin = start;
+    if (start.stationId) {
+      const here = livePosition();
+      origin = here && isNearNetwork(stations, here) ? here : null;
+    }
+    const pickedStation = start.stationId || destination.stationId;
+    const walkOnly =
+      pickup.id === dropoff.id ||
+      (!pickedStation && shouldWalkOnly(start, destination, pickup, dropoff));
 
     let legs;
-    if (shouldWalkOnly(start, destination, pickup, dropoff)) {
+    if (walkOnly) {
       const walkRoute = await fetchRoute(
         FOOT_ROUTER_URL,
         start,
@@ -837,36 +918,54 @@ async function planRoute(event) {
         "the walk",
       );
       legs = [{ mode: "walk", title: "Walk to destination", route: walkRoute }];
-      showMessage(
+      warnings.push(
         "Walking directly is shorter than walking to and from the Valenbisi stations.",
-        "info",
       );
       renderSummary(legs, start, destination, null, null);
     } else {
-      const routes = await Promise.all([
-        fetchRoute(
-          FOOT_ROUTER_URL,
-          start,
-          pickup,
-          "the walk to the pickup station",
-        ),
-        fetchRoute(BIKE_ROUTER_URL, pickup, dropoff, "the bike ride"),
-        fetchRoute(
-          FOOT_ROUTER_URL,
-          dropoff,
-          destination,
-          "the walk to the destination",
-        ),
-      ]);
-      legs = [
-        { mode: "walk", title: "Walk to the pickup station", route: routes[0] },
-        { mode: "bike", title: "Ride to the return station", route: routes[1] },
-        { mode: "walk", title: "Walk to destination", route: routes[2] },
-      ];
+      const plannedLegs = [];
+      if (origin) {
+        plannedLegs.push({
+          mode: "walk",
+          title: "Walk to the pickup station",
+          router: FOOT_ROUTER_URL,
+          from: origin,
+          to: pickup,
+          name: "the walk to the pickup station",
+        });
+      }
+      plannedLegs.push({
+        mode: "bike",
+        title: "Ride to the return station",
+        router: BIKE_ROUTER_URL,
+        from: pickup,
+        to: dropoff,
+        name: "the bike ride",
+      });
+      // A destination station is where the bike goes back: no walk after it.
+      if (!destination.stationId) {
+        plannedLegs.push({
+          mode: "walk",
+          title: "Walk to destination",
+          router: FOOT_ROUTER_URL,
+          from: dropoff,
+          to: destination,
+          name: "the walk to the destination",
+        });
+      }
+      const routes = await Promise.all(
+        plannedLegs.map(function (leg) {
+          return fetchRoute(leg.router, leg.from, leg.to, leg.name);
+        }),
+      );
+      legs = plannedLegs.map(function (leg, i) {
+        return { mode: leg.mode, title: leg.title, route: routes[i] };
+      });
       stationMarker(pickup, BIKE_ICON, "Pickup station").addTo(routeLayer);
       stationMarker(dropoff, PARKING_ICON, "Return station").addTo(routeLayer);
-      renderSummary(legs, start, destination, pickup, dropoff);
+      renderSummary(legs, origin || start, destination, pickup, dropoff);
     }
+    if (warnings.length) showMessage(warnings.join(" "), "info");
 
     drawLegs(legs);
     map.fitBounds(routeLayer.getBounds(), paddingOutsidePanel());
@@ -921,6 +1020,7 @@ function togglePanel() {
 }
 
 map.on("click", onMapClick);
+document.addEventListener("click", onStationButtonClick);
 document.getElementById("route-form").addEventListener("submit", planRoute);
 document
   .getElementById("locate-button")

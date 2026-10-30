@@ -35,6 +35,13 @@ The map shows all stations as small circles:
 
 Map clicks fill the empty field: first the start, then the destination. When both fields are filled, the next click starts again.
 
+A station popup has "Start" and "Destination" buttons. Use them when a station covers the spot that you want to click, or when you want a specific station:
+
+- "Start" makes this the pickup station. The trip then begins with a walk from your live location to the station, if the app knows your location. Otherwise the trip begins at the station.
+- "Destination" makes this the return station. The trip ends at the station, without a last walk.
+
+The app keeps a station that you picked, even if it has fewer than 3 bikes or free docks, and shows a warning.
+
 ## Data sources
 
 - Station availability: [Valenbisi disponibilidad, Valencia Open Data](https://opendata.vlci.valencia.es/en/dataset/valenbisi-disponibilitat-valenbisi-dsiponibilidad), loaded live from the city geoportal (GeoJSON).
