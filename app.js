@@ -1,4 +1,4 @@
-// Valenbisi route planner: walk -> bike -> walk, in plain JavaScript.
+// vlcbici: route planner for Valencia (walk -> Valenbisi bike -> walk), in plain JavaScript.
 
 var STATIONS_URL =
   "https://geoportal.valencia.es/server/rest/services/OPENDATA/Trafico/MapServer/228/query?where=1=1&outFields=*&f=geojson";

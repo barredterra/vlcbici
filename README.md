@@ -1,4 +1,4 @@
-# Valenbisi Route Planner
+# vlcbici
 
 A small static web app that plans a trip in Valencia with walking and Valenbisi bike sharing.
 
