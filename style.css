@@ -146,6 +146,12 @@ button:disabled {
   font-size: 13px;
 }
 
+.disclaimer {
+  margin: 12px 0 0;
+  color: #555;
+  font-size: 12px;
+}
+
 .leg {
   margin-top: 8px;
   padding: 6px 8px;

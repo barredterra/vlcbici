@@ -2,6 +2,9 @@
 
 A small static web app that plans a trip in Valencia with walking and Valenbisi bike sharing.
 
+> [!NOTE]
+> This is an unofficial project. It is not affiliated with, endorsed by or connected to Valenbisi, JCDecaux or the City of Valencia. "Valenbisi" is used only to name the bike sharing service that the app works with. Station data comes from the city's public open data and can be out of date. Check the station before you rely on it.
+
 ## What it does
 
 1. You enter a start and a destination. You can type an address, click the map, or use your current location for the start.
