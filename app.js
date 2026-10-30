@@ -2,6 +2,11 @@
 
 var STATIONS_URL =
   "https://geoportal.valencia.es/server/rest/services/OPENDATA/Trafico/MapServer/228/query?where=1=1&outFields=*&f=geojson";
+// The city's official cycling network ("Itinerarios Ciclistas"). Simplified to about 1 m,
+// which cuts the download from 2.2 MB to 350 kB.
+var BIKE_NETWORK_URL =
+  "https://geoportal.valencia.es/server/rest/services/OPENDATA/Trafico/MapServer/189/query" +
+  "?where=1=1&outFields=estado&outSR=4326&maxAllowableOffset=0.00001&f=geojson";
 var FOOT_ROUTER_URL = "https://routing.openstreetmap.de/routed-foot/route/v1/driving/";
 var BIKE_ROUTER_URL = "https://routing.openstreetmap.de/routed-bike/route/v1/driving/";
 var GEOCODER_URL =
@@ -18,9 +23,27 @@ var VALENCIA_CENTER = [39.4699, -0.3763];
 var WALK_STYLE = { color: "#d62828", weight: 7, opacity: 0.9, dashArray: "1 12", lineCap: "round" };
 var BIKE_STYLE = { color: "#d62828", weight: 8, opacity: 0.9 };
 
+// Line styles for the "estado" codes of the city bike network, grouped for the legend.
+var BIKE_NETWORK_GROUPS = [
+  // Bike lane, Turia park bike lane, bike path, network outside the city limits
+  { label: "Bike lane or path", codes: ["1", "4", "6", "8"], style: { color: "#1d4ed8", weight: 4 } },
+  // Cycle street (30 km/h), bus-bike lane, low-traffic "ciclobarrio"
+  { label: "Shared with traffic", codes: ["2", "7", "9"], style: { color: "#0891b2", weight: 3 } },
+  { label: "Pedestrian street", codes: ["3"], style: { color: "#6b7280", weight: 3, dashArray: "4 6" } },
+  { label: "Closed for works", codes: ["5"], style: { color: "#f59e0b", weight: 4, dashArray: "6 6" } },
+];
+
 // ---------------------------------------------------------------------------
 // Pure logic: no DOM, no network.
 // ---------------------------------------------------------------------------
+
+// The city may add new codes; draw unknown ones like a normal bike lane.
+function bikeNetworkGroup(code) {
+  var group = BIKE_NETWORK_GROUPS.find(function (g) {
+    return g.codes.indexOf(code) !== -1;
+  });
+  return group || BIKE_NETWORK_GROUPS[0];
+}
 
 function haversineMeters(a, b) {
   var earthRadius = 6371000;
@@ -239,12 +262,15 @@ var map = L.map("map").setView(VALENCIA_CENTER, 14);
 // Set it before adding layers: setPosition re-adds the control, which counts their credits twice.
 map.attributionControl.setPosition("topright");
 var OSM_CREDIT = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-var standardLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19,
-  // OSM blocks tile requests without a Referer: https://wiki.openstreetmap.org/wiki/Blocked_tiles
-  referrerPolicy: "strict-origin-when-cross-origin",
-  attribution: OSM_CREDIT,
-});
+function osmStandardTiles() {
+  return L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    // OSM blocks tile requests without a Referer: https://wiki.openstreetmap.org/wiki/Blocked_tiles
+    referrerPolicy: "strict-origin-when-cross-origin",
+    attribution: OSM_CREDIT,
+  });
+}
+var standardLayer = osmStandardTiles();
 // CyclOSM shows bike lanes, cycle tracks and bike parking.
 var cyclingLayer = L.tileLayer("https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png", {
   maxZoom: 19,
@@ -254,11 +280,52 @@ var cyclingLayer = L.tileLayer("https://{s}.tile-cyclosm.openstreetmap.fr/cyclos
     ' | Map style: <a href="https://www.cyclosm.org/">CyclOSM</a>' +
     ' hosted by <a href="https://openstreetmap.fr/">OpenStreetMap France</a>',
 });
+
+// City bike network: standard tiles plus the city's lines, loaded on first use.
+// Its own pane keeps the lines below the route and station markers (overlayPane is 400).
+map.createPane("bikeNetwork").style.zIndex = 350;
+var bikeNetworkLines = L.geoJSON(null, {
+  pane: "bikeNetwork",
+  interactive: false, // map clicks must still set start and destination
+  style: function (feature) {
+    return bikeNetworkGroup(feature.properties.estado).style;
+  },
+});
+var cityLayer = L.layerGroup([osmStandardTiles(), bikeNetworkLines]);
+var bikeNetworkLegend = L.control({ position: "topright" });
+bikeNetworkLegend.onAdd = function () {
+  var box = L.DomUtil.create("div", "network-legend");
+  var rows = BIKE_NETWORK_GROUPS.map(function (group) {
+    var lineStyle = group.style.dashArray ? "dashed" : "solid";
+    var sample = group.style.weight + "px " + lineStyle + " " + group.style.color;
+    return '<div><span style="border-top:' + sample + '"></span>' + group.label + "</div>";
+  });
+  box.innerHTML = "<strong>City bike network</strong>" + rows.join("");
+  return box;
+};
+var bikeNetworkLoaded = false;
+cityLayer.on("add", async function () {
+  bikeNetworkLegend.addTo(map);
+  if (bikeNetworkLoaded) return;
+  bikeNetworkLoaded = true;
+  try {
+    bikeNetworkLines.addData(await fetchJson(BIKE_NETWORK_URL));
+  } catch (err) {
+    bikeNetworkLoaded = false; // try again the next time the layer is chosen
+    showMessage("Could not load the city bike network (" + err.message + ").", "error");
+  }
+});
+cityLayer.on("remove", function () {
+  bikeNetworkLegend.remove();
+});
+
 standardLayer.addTo(map);
-L.control.layers({ Standard: standardLayer, Cycling: cyclingLayer }).addTo(map);
-// These credits apply to both map styles.
+L.control
+  .layers({ Standard: standardLayer, Cycling: cyclingLayer, "City bike network": cityLayer })
+  .addTo(map);
+// These credits apply to all map styles.
 map.attributionControl.addAttribution(
-  'Stations: <a href="https://opendata.vlci.valencia.es/">Valencia Open Data</a>' +
+  'Stations and bike network: <a href="https://opendata.vlci.valencia.es/">Valencia Open Data</a>' +
   ' | Routing: <a href="https://routing.openstreetmap.de/">FOSSGIS OSRM</a>'
 );
 
