@@ -43,10 +43,21 @@ body {
   inset: 0;
 }
 
+/* Keep the map controls clear of the notch and the rounded screen corners (viewport-fit=cover). */
+.leaflet-top {
+  top: env(safe-area-inset-top);
+}
+.leaflet-left {
+  left: env(safe-area-inset-left);
+}
+.leaflet-right {
+  right: env(safe-area-inset-right);
+}
+
 #panel {
   position: absolute;
-  top: 10px;
-  left: 54px;
+  top: calc(10px + env(safe-area-inset-top));
+  left: calc(54px + env(safe-area-inset-left));
   z-index: 1000;
   width: 360px;
   max-height: calc(100% - 20px);
@@ -459,12 +470,31 @@ button:disabled {
     left: 0;
     width: 100%;
     max-height: 55%;
+    /* White continues below the home indicator; the content stays above it. */
+    padding-bottom: env(safe-area-inset-bottom);
     border-radius: 10px 10px 0 0;
   }
 
   /* The attribution sits top right (see app.js); keep it clear of the zoom buttons. */
   .leaflet-control-attribution {
     max-width: calc(100vw - 54px);
+  }
+}
+
+/* Touch screens: 44px targets for a thumb on the street, and 16px input text
+   so that iOS Safari does not zoom in when a field gets focus. */
+@media (pointer: coarse) {
+  button,
+  input[type="text"] {
+    min-height: 44px;
+  }
+
+  input[type="text"] {
+    font-size: 16px;
+  }
+
+  .leg summary {
+    padding: 10px 0;
   }
 }
 

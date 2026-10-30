@@ -983,6 +983,9 @@ async function planRoute(event) {
 
     drawLegs(legs);
     map.fitBounds(routeLayer.getBounds(), paddingOutsidePanel());
+    // In a short panel (phones, landscape) the plan is below the form: bring it into view.
+    const firstResult = messageBox.textContent ? messageBox : summaryBox;
+    firstResult.scrollIntoView({ block: "start" });
   } catch (err) {
     showMessage(err.message, "error");
   } finally {
@@ -1002,10 +1005,13 @@ function paddingOutsidePanel() {
   const margin = 30;
   const isPhone = window.matchMedia("(max-width: 600px)").matches;
   if (isPhone) {
-    const attributionHeight =
-      map.attributionControl.getContainer().offsetHeight;
+    // Attribution and layer switcher, stacked top right; taller than the zoom buttons.
+    const topControls = map
+      .getContainer()
+      .querySelector(".leaflet-top.leaflet-right");
+    const topControlsBottom = topControls.getBoundingClientRect().bottom;
     return {
-      paddingTopLeft: [margin, attributionHeight + margin],
+      paddingTopLeft: [margin, topControlsBottom + margin],
       paddingBottomRight: [margin, panel.offsetHeight + margin],
     };
   }

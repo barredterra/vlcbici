@@ -193,7 +193,7 @@ A neutral slate instrument panel with a single magenta course line, and a fixed 
 The map fills the viewport. The panel floats above it.
 
 - **Desktop:** a 360px panel, 10px from the top and 54px from the left (clear of the zoom buttons), with a scrolling body and a max height of the viewport minus 20px.
-- **Phone (≤600px):** the panel becomes a full-width bottom sheet, at most 55% of the height, with 10px top corners. The map attribution moves to the top right so the sheet never covers it.
+- **Phone (≤600px):** the panel becomes a full-width bottom sheet, at most 55% of the height, with 10px top corners. The map attribution moves to the top right so the sheet never covers it. The sheet's white continues under the home indicator (`safe-area-inset-bottom`); the map controls and the desktop panel keep clear of the notch. After a plan, the panel scrolls to the result, because the form fills most of a short panel.
 - When a route is drawn, the map fits the route into the space the panel leaves free (to the right on desktop, above the sheet on phones).
 - **Spacing rhythm:** 6px inside rows and between a label and its field, 8px between cards and list items, 10–12px for panel padding and section gaps.
 
@@ -224,11 +224,13 @@ Gently rounded and plain. Controls, inputs, cards and messages use a 5px radius;
 - **Secondary:** Slate Soft fill with Slate Secondary Text ("My location", "Clear", "Hide").
 - **Focus:** 2px Route Magenta outline, 2px offset.
 - **Disabled:** 60% opacity and a wait cursor while a plan runs.
+- **Touch:** on touch screens (`pointer: coarse`) every button and text input is at least 44px tall.
 
 ### Inputs / Fields
 
 - **Style:** white, 1px Slate Border, 5px radius, 15px Slate Ink text, Slate Muted placeholder, Route Magenta caret.
 - **Focus:** border and 1px outline in Route Magenta.
+- **Touch:** 16px text on touch screens, so iOS Safari does not zoom in on focus.
 
 ### A/B Badges (signature)
 

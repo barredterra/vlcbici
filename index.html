@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
     <title>vlcbici – bike sharing routes for Valencia</title>
     <link
       rel="stylesheet"
@@ -32,7 +35,7 @@
             <input
               id="start-input"
               type="text"
-              placeholder="Address or click the map"
+              placeholder="Address or pick on the map"
               autocomplete="off"
             />
             <button id="locate-button" type="button" title="Use my location">
@@ -47,12 +50,13 @@
           <input
             id="dest-input"
             type="text"
-            placeholder="Address or click the map"
+            placeholder="Address or pick on the map"
             autocomplete="off"
           />
 
           <p class="hint">
-            Map clicks fill the empty field: start first, then destination.
+            Pick a point on the map to fill the empty field: start first, then
+            destination.
           </p>
 
           <div class="row">
