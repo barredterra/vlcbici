@@ -2,6 +2,27 @@
   box-sizing: border-box;
 }
 
+/* Colour roles. The map colours (pins, lines, station dots) live in app.js and use the same values. */
+:root {
+  --brand: #d62828; /* Valencia red: primary action, bike route, pickup and return stations */
+  --brand-tint: #fde8e8;
+  --brand-ink: #9b1c1c;
+  --ink: #222;
+  --muted: #555;
+  --start: #111827; /* "A" pin */
+  --dest: #7c3aed; /* "B" pin */
+}
+
+::selection {
+  background: var(--brand-tint);
+  color: var(--brand-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
 html,
 body {
   margin: 0;
@@ -13,7 +34,7 @@ body {
     Roboto,
     sans-serif;
   font-size: 15px;
-  color: #222;
+  color: var(--ink);
 }
 
 #map {
@@ -48,6 +69,10 @@ body {
   font-size: 17px;
 }
 
+#panel-header h1 span {
+  color: var(--brand);
+}
+
 #panel-body {
   padding: 10px 12px;
   overflow-y: auto;
@@ -58,7 +83,9 @@ body {
 }
 
 label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin: 6px 0 3px;
   font-weight: 600;
   font-size: 13px;
@@ -70,6 +97,32 @@ input[type="text"] {
   border: 1px solid #bbb;
   border-radius: 5px;
   font-size: 15px;
+  caret-color: var(--brand);
+}
+
+input[type="text"]:focus-visible {
+  border-color: var(--brand);
+  outline: 1px solid var(--brand);
+  outline-offset: 0;
+}
+
+/* Matches the A and B pins on the map. */
+.ab-badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--start);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ab-badge.dest {
+  background: var(--dest);
 }
 
 .row {
@@ -86,7 +139,7 @@ button {
   padding: 7px 10px;
   border: 0;
   border-radius: 5px;
-  background: #d62828;
+  background: var(--brand);
   color: #fff;
   font-size: 14px;
   cursor: pointer;
@@ -125,8 +178,8 @@ button:disabled {
 #message.error {
   padding: 8px;
   border-radius: 5px;
-  background: #fde8e8;
-  color: #9b1c1c;
+  background: var(--brand-tint);
+  color: var(--brand-ink);
 }
 
 #message.info {
@@ -144,6 +197,29 @@ button:disabled {
 .place {
   color: #555;
   font-size: 13px;
+}
+
+/* Key for the station dots on the map. */
+.station-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.station-legend li::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: var(--dot);
+  vertical-align: -1px;
 }
 
 .disclaimer {
@@ -166,11 +242,11 @@ button:disabled {
   width: 18px;
   margin-right: 6px;
   vertical-align: middle;
-  border-top: 4px dotted #d62828;
+  border-top: 4px dotted var(--brand);
 }
 
 .leg.bike .leg-title::before {
-  border-top: 4px solid #d62828;
+  border-top: 4px solid var(--brand);
 }
 
 .leg-title {
@@ -207,8 +283,8 @@ button:disabled {
   padding: 6px;
   box-sizing: border-box;
   border-radius: 50%;
-  background: #fde8e8;
-  color: #d62828;
+  background: var(--brand-tint);
+  color: var(--brand);
 }
 
 .station-icon svg,
@@ -233,7 +309,7 @@ button:disabled {
 
 .popup-role {
   margin-bottom: 4px;
-  color: #d62828;
+  color: var(--brand);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -287,8 +363,8 @@ button:disabled {
 
 /* Fewer than 3 bikes or docks: not usable for pickup or return. */
 .popup-stat.low {
-  background: #fde8e8;
-  color: #9b1c1c;
+  background: var(--brand-tint);
+  color: var(--brand-ink);
 }
 
 .popup-actions {
@@ -300,12 +376,21 @@ button:disabled {
 /* Big enough to tap. */
 .popup-actions button {
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   min-height: 36px;
+}
+
+/* White ring keeps the badge apart from the red button. */
+.popup-actions .ab-badge {
+  box-shadow: 0 0 0 1.5px #fff;
 }
 
 .popup-stats.stale .popup-stat {
   background: #f3f4f6;
-  color: #9ca3af;
+  color: #6b7280;
 }
 
 /* Icon inside the round map pin of the pickup and return stations. */

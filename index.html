@@ -17,7 +17,7 @@
 
     <aside id="panel">
       <header id="panel-header">
-        <h1>vlcbici</h1>
+        <h1>vlc<span>bici</span></h1>
         <button id="toggle-panel" type="button" aria-expanded="true">
           Hide
         </button>
@@ -25,7 +25,9 @@
 
       <div id="panel-body">
         <form id="route-form">
-          <label for="start-input">Start</label>
+          <label for="start-input"
+            ><span class="ab-badge" aria-hidden="true">A</span>Start</label
+          >
           <div class="row">
             <input
               id="start-input"
@@ -38,7 +40,10 @@
             </button>
           </div>
 
-          <label for="dest-input">Destination</label>
+          <label for="dest-input"
+            ><span class="ab-badge dest" aria-hidden="true">B</span
+            >Destination</label
+          >
           <input
             id="dest-input"
             type="text"
@@ -60,6 +65,15 @@
 
         <div id="message" role="status"></div>
         <div id="summary"></div>
+
+        <!-- Same colours as stationColour() in app.js. -->
+        <ul class="station-legend" aria-label="Station colours">
+          <li style="--dot: #16a34a">Bikes and docks</li>
+          <li style="--dot: #ea580c">Few docks</li>
+          <li style="--dot: #eab308">Few bikes</li>
+          <li style="--dot: #dc2626">Few of both</li>
+          <li style="--dot: #9ca3af">Closed or no data</li>
+        </ul>
 
         <p class="disclaimer">
           Unofficial app. Not affiliated with Valenbisi, JCDecaux or the City of

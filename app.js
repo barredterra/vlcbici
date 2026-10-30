@@ -473,6 +473,7 @@ function pinIcon(content, colour) {
   });
 }
 
+// Keep in sync with the station legend in index.html.
 function stationColour(station, now) {
   if (!isStationLive(station, now)) return "#9ca3af";
   if (station.bikes >= MIN_BIKES && station.docks >= MIN_DOCKS)
@@ -533,10 +534,10 @@ function stationPopup(station, role) {
     '<div class="popup-actions">' +
     '<button type="button" data-use-station="start" data-station-id="' +
     station.id +
-    '">Start</button>' +
+    '"><span class="ab-badge" aria-hidden="true">A</span>Start</button>' +
     '<button type="button" data-use-station="destination" data-station-id="' +
     station.id +
-    '">Destination</button>' +
+    '"><span class="ab-badge dest" aria-hidden="true">B</span>Destination</button>' +
     "</div>"
   );
 }
@@ -565,6 +566,7 @@ function drawStations(stations) {
   });
 }
 
+// Same colours as --start and --dest in style.css.
 function drawPoints() {
   pointLayer.clearLayers();
   if (startPoint) {
