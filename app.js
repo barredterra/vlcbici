@@ -471,12 +471,57 @@ function useMyLocation() {
       var point = { lat: position.coords.latitude, lon: position.coords.longitude };
       setStart(point);
       map.setView([point.lat, point.lon], 15);
+      showLiveLocation(position);
+      watchLiveLocation();
     },
     function (err) {
       showMessage("Could not get your location: " + err.message, "error");
     },
     { enableHighAccuracy: true, timeout: 10000 }
   );
+}
+
+// Live location: a pulsing blue dot that follows the user.
+var liveLocationMarker = null;
+var liveLocationWatchId = null;
+
+function showLiveLocation(position) {
+  var latLng = [position.coords.latitude, position.coords.longitude];
+  if (liveLocationMarker) {
+    liveLocationMarker.setLatLng(latLng);
+    return;
+  }
+  var icon = L.divIcon({
+    className: "live-location",
+    html: '<span class="pulse"></span><span class="dot"></span>',
+    iconSize: [18, 18],
+  });
+  // Above the A/B pins, below the station pins.
+  liveLocationMarker = L.marker(latLng, { icon: icon, interactive: false, zIndexOffset: 500 }).addTo(map);
+}
+
+function watchLiveLocation() {
+  if (liveLocationWatchId !== null) return;
+  liveLocationWatchId = navigator.geolocation.watchPosition(
+    showLiveLocation,
+    function (err) {
+      // Keep the last dot on short GPS gaps; remove it when the user revokes access.
+      if (err.code !== err.PERMISSION_DENIED) return;
+      navigator.geolocation.clearWatch(liveLocationWatchId);
+      liveLocationWatchId = null;
+      if (liveLocationMarker) liveLocationMarker.remove();
+      liveLocationMarker = null;
+    },
+    { enableHighAccuracy: true, maximumAge: 10000 }
+  );
+}
+
+// Show the dot at once when the user allowed location on an earlier visit. Never prompt on load.
+function watchLiveLocationIfAllowed() {
+  if (!navigator.geolocation || !navigator.permissions) return;
+  navigator.permissions.query({ name: "geolocation" }).then(function (status) {
+    if (status.state === "granted") watchLiveLocation();
+  });
 }
 
 // Use the picked point, or geocode the typed text.
@@ -686,3 +731,5 @@ fetchStations()
   .catch(function (err) {
     showMessage(err.message, "error");
   });
+
+watchLiveLocationIfAllowed();
