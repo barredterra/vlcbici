@@ -1,38 +1,38 @@
 // vlcbici: route planner for Valencia (walk -> Valenbisi bike -> walk), in plain JavaScript.
 
-var STATIONS_URL =
+const STATIONS_URL =
   "https://geoportal.valencia.es/server/rest/services/OPENDATA/Trafico/MapServer/228/query?where=1=1&outFields=*&f=geojson";
 // The city's official cycling network ("Itinerarios Ciclistas"). Simplified to about 1 m,
 // which cuts the download from 2.2 MB to 350 kB.
-var BIKE_NETWORK_URL =
+const BIKE_NETWORK_URL =
   "https://geoportal.valencia.es/server/rest/services/OPENDATA/Trafico/MapServer/189/query" +
   "?where=1=1&outFields=estado&outSR=4326&maxAllowableOffset=0.00001&f=geojson";
-var FOOT_ROUTER_URL =
+const FOOT_ROUTER_URL =
   "https://routing.openstreetmap.de/routed-foot/route/v1/driving/";
-var BIKE_ROUTER_URL =
+const BIKE_ROUTER_URL =
   "https://routing.openstreetmap.de/routed-bike/route/v1/driving/";
-var GEOCODER_URL =
+const GEOCODER_URL =
   "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&viewbox=-0.45,39.53,-0.28,39.40&bounded=1&q=";
 
-var MIN_BIKES = 3;
-var MIN_DOCKS = 3;
-var MAX_STATION_AGE_MS = 2 * 60 * 60 * 1000;
-var MAX_DISTANCE_TO_NETWORK_M = 2000; // farther from every station = outside the Valenbisi area
-var MAX_SNAP_DISTANCE_M = 300; // farther from a road or path = point is not routable
-var GEOCODER_INTERVAL_MS = 1000; // Nominatim policy: max 1 request per second
-var VALENCIA_CENTER = [39.4699, -0.3763];
+const MIN_BIKES = 3;
+const MIN_DOCKS = 3;
+const MAX_STATION_AGE_MS = 2 * 60 * 60 * 1000;
+const MAX_DISTANCE_TO_NETWORK_M = 2000; // farther from every station = outside the Valenbisi area
+const MAX_SNAP_DISTANCE_M = 300; // farther from a road or path = point is not routable
+const GEOCODER_INTERVAL_MS = 1000; // Nominatim policy: max 1 request per second
+const VALENCIA_CENTER = [39.4699, -0.3763];
 
-var WALK_STYLE = {
+const WALK_STYLE = {
   color: "#d62828",
   weight: 7,
   opacity: 0.9,
   dashArray: "1 12",
   lineCap: "round",
 };
-var BIKE_STYLE = { color: "#d62828", weight: 8, opacity: 0.9 };
+const BIKE_STYLE = { color: "#d62828", weight: 8, opacity: 0.9 };
 
 // Line styles for the "estado" codes of the city bike network, grouped for the legend.
-var BIKE_NETWORK_GROUPS = [
+const BIKE_NETWORK_GROUPS = [
   // Bike lane, Turia park bike lane, bike path, network outside the city limits
   {
     label: "Bike lane or path",
@@ -63,20 +63,20 @@ var BIKE_NETWORK_GROUPS = [
 
 // The city may add new codes; draw unknown ones like a normal bike lane.
 function bikeNetworkGroup(code) {
-  var group = BIKE_NETWORK_GROUPS.find(function (g) {
+  const group = BIKE_NETWORK_GROUPS.find(function (g) {
     return g.codes.indexOf(code) !== -1;
   });
   return group || BIKE_NETWORK_GROUPS[0];
 }
 
 function haversineMeters(a, b) {
-  var earthRadius = 6371000;
-  var toRad = Math.PI / 180;
-  var dLat = (b.lat - a.lat) * toRad;
-  var dLon = (b.lon - a.lon) * toRad;
-  var sinLat = Math.sin(dLat / 2);
-  var sinLon = Math.sin(dLon / 2);
-  var h =
+  const earthRadius = 6371000;
+  const toRad = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * toRad;
+  const dLon = (b.lon - a.lon) * toRad;
+  const sinLat = Math.sin(dLat / 2);
+  const sinLon = Math.sin(dLon / 2);
+  const h =
     sinLat * sinLat +
     Math.cos(a.lat * toRad) * Math.cos(b.lat * toRad) * sinLon * sinLon;
   return 2 * earthRadius * Math.asin(Math.sqrt(h));
@@ -84,7 +84,7 @@ function haversineMeters(a, b) {
 
 function parseStations(geojson) {
   return geojson.features.map(function (feature) {
-    var p = feature.properties;
+    const p = feature.properties;
     return {
       id: p.number,
       name: p.name,
@@ -101,15 +101,15 @@ function parseStations(geojson) {
 
 // A station counts only when it is open and reported recently.
 function isStationLive(station, now) {
-  var age = now - station.updatedAt;
+  const age = now - station.updatedAt;
   return station.open && age <= MAX_STATION_AGE_MS;
 }
 
 function nearestStation(stations, point) {
-  var best = null;
-  var bestDistance = Infinity;
+  let best = null;
+  let bestDistance = Infinity;
   stations.forEach(function (station) {
-    var distance = haversineMeters(point, station);
+    const distance = haversineMeters(point, station);
     if (distance < bestDistance) {
       best = station;
       bestDistance = distance;
@@ -119,14 +119,14 @@ function nearestStation(stations, point) {
 }
 
 function choosePickupStation(stations, start, now) {
-  var candidates = stations.filter(function (s) {
+  const candidates = stations.filter(function (s) {
     return isStationLive(s, now) && s.bikes >= MIN_BIKES;
   });
   return nearestStation(candidates, start);
 }
 
 function chooseDropoffStation(stations, destination, now) {
-  var candidates = stations.filter(function (s) {
+  const candidates = stations.filter(function (s) {
     return isStationLive(s, now) && s.docks >= MIN_DOCKS;
   });
   return nearestStation(candidates, destination);
@@ -135,14 +135,14 @@ function chooseDropoffStation(stations, destination, now) {
 // A bike only helps when walking to and from the stations is shorter than walking directly.
 function shouldWalkOnly(start, destination, pickup, dropoff) {
   if (pickup.id === dropoff.id) return true;
-  var stationWalks =
+  const stationWalks =
     haversineMeters(start, pickup) + haversineMeters(dropoff, destination);
-  var directWalk = haversineMeters(start, destination);
+  const directWalk = haversineMeters(start, destination);
   return stationWalks >= directWalk;
 }
 
 function isNearNetwork(stations, point) {
-  var closest = nearestStation(stations, point);
+  const closest = nearestStation(stations, point);
   return haversineMeters(point, closest) <= MAX_DISTANCE_TO_NETWORK_M;
 }
 
@@ -160,33 +160,33 @@ function formatMinutes(seconds) {
 }
 
 function formatAge(ms) {
-  var minutes = Math.round(ms / 60000);
+  const minutes = Math.round(ms / 60000);
   if (minutes < 1) return "just now";
   if (minutes < 60) return minutes + " min ago";
-  var hours = Math.round(minutes / 60);
+  const hours = Math.round(minutes / 60);
   if (hours < 48) return hours + " h ago";
   return Math.round(hours / 24) + " days ago";
 }
 
 // Turn one OSRM step into a short English instruction.
 function formatStep(step) {
-  var type = step.maneuver.type;
-  var modifier = step.maneuver.modifier;
-  var road = step.name ? step.name : "the path";
-  var direction = modifier ? " " + modifier : "";
-  var text;
+  const type = step.maneuver.type;
+  const modifier = step.maneuver.modifier;
+  const road = step.name || "the path";
+  const direction = modifier ? " " + modifier : "";
+  let text;
 
   if (type === "depart") {
     text = "Start on " + road;
   } else if (type === "arrive") {
     text = "Arrive";
   } else if (type === "roundabout" || type === "rotary") {
-    var exit = step.maneuver.exit ? "exit " + step.maneuver.exit : "the exit";
+    const exit = step.maneuver.exit ? "exit " + step.maneuver.exit : "the exit";
     text = "At the roundabout take " + exit + " onto " + road;
   } else if (modifier === "uturn") {
     text = "Make a U-turn onto " + road;
   } else if (type === "new name" || type === "continue") {
-    var keepSide = modifier && modifier !== "straight";
+    const keepSide = modifier && modifier !== "straight";
     text = keepSide
       ? "Keep" + direction + " onto " + road
       : "Continue onto " + road;
@@ -196,7 +196,7 @@ function formatStep(step) {
     text = "At the end of the road turn" + direction + " onto " + road;
   } else {
     // turn, fork, merge, on ramp, off ramp, notification, ...
-    var verb = type.charAt(0).toUpperCase() + type.slice(1);
+    const verb = type.charAt(0).toUpperCase() + type.slice(1);
     text = verb + direction + " onto " + road;
   }
 
@@ -211,7 +211,7 @@ function formatStep(step) {
 // ---------------------------------------------------------------------------
 
 async function fetchJson(url) {
-  var response = await fetch(url);
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error("HTTP " + response.status + " from " + new URL(url).host);
   }
@@ -219,7 +219,7 @@ async function fetchJson(url) {
 }
 
 async function fetchStations() {
-  var geojson;
+  let geojson;
   try {
     geojson = await fetchJson(STATIONS_URL);
   } catch (err) {
@@ -229,20 +229,22 @@ async function fetchStations() {
   }
   // The ArcGIS server reports query errors as HTTP 200 with an "error" body.
   if (!geojson.features) {
-    var reason = geojson.error ? geojson.error.message : "unexpected response";
+    const reason = geojson.error
+      ? geojson.error.message
+      : "unexpected response";
     throw new Error("Could not load Valenbisi station data (" + reason + ").");
   }
   return parseStations(geojson);
 }
 
-var lastGeocodeAt = 0;
+let lastGeocodeAt = 0;
 
 async function geocode(text, label) {
-  var waitMs = lastGeocodeAt + GEOCODER_INTERVAL_MS - Date.now();
+  const waitMs = lastGeocodeAt + GEOCODER_INTERVAL_MS - Date.now();
   if (waitMs > 0) await wait(waitMs);
   lastGeocodeAt = Date.now();
 
-  var results;
+  let results;
   try {
     results = await fetchJson(GEOCODER_URL + encodeURIComponent(text));
   } catch (err) {
@@ -255,7 +257,7 @@ async function geocode(text, label) {
       "No place found in Valencia for " + label + ' "' + text + '".',
     );
   }
-  var place = results[0];
+  const place = results[0];
   return {
     lat: Number(place.lat),
     lon: Number(place.lon),
@@ -265,12 +267,13 @@ async function geocode(text, label) {
 
 // Returns { distance, duration, coordinates: [[lat, lon], ...], steps }.
 async function fetchRoute(routerUrl, from, to, legName) {
-  var coords = from.lon + "," + from.lat + ";" + to.lon + "," + to.lat;
-  var url = routerUrl + coords + "?overview=full&geometries=geojson&steps=true";
-  var data;
+  const coords = from.lon + "," + from.lat + ";" + to.lon + "," + to.lat;
+  const url =
+    routerUrl + coords + "?overview=full&geometries=geojson&steps=true";
+  let data;
   try {
     // No fetchJson here: OSRM sends its error codes with HTTP 400 and a JSON body.
-    var response = await fetch(url);
+    const response = await fetch(url);
     data = await response.json();
   } catch (err) {
     throw new Error(
@@ -287,15 +290,15 @@ async function fetchRoute(routerUrl, from, to, legName) {
     );
   }
   // OSRM snaps each point to the nearest road, even when that road is kilometres away.
-  var snapDistance = Math.max(
+  const snapDistance = Math.max(
     data.waypoints[0].distance,
     data.waypoints[1].distance,
   );
   if (snapDistance > MAX_SNAP_DISTANCE_M) {
     throw new Error("No road or path found near the ends of " + legName + ".");
   }
-  var route = data.routes[0];
-  var latLngs = route.geometry.coordinates.map(function (c) {
+  const route = data.routes[0];
+  const latLngs = route.geometry.coordinates.map(function (c) {
     return [c[1], c[0]];
   });
   return {
@@ -316,11 +319,11 @@ function wait(ms) {
 // Map and UI
 // ---------------------------------------------------------------------------
 
-var map = L.map("map").setView(VALENCIA_CENTER, 14);
+const map = L.map("map").setView(VALENCIA_CENTER, 14);
 // Top right, so the panel (bottom sheet on phones) never covers the OSM credit.
 // Set it before adding layers: setPosition re-adds the control, which counts their credits twice.
 map.attributionControl.setPosition("topright");
-var OSM_CREDIT =
+const OSM_CREDIT =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 function osmStandardTiles() {
   return L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -330,9 +333,9 @@ function osmStandardTiles() {
     attribution: OSM_CREDIT,
   });
 }
-var standardLayer = osmStandardTiles();
+const standardLayer = osmStandardTiles();
 // CyclOSM shows bike lanes, cycle tracks and bike parking.
-var cyclingLayer = L.tileLayer(
+const cyclingLayer = L.tileLayer(
   "https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
   {
     maxZoom: 19,
@@ -347,20 +350,20 @@ var cyclingLayer = L.tileLayer(
 // City bike network: standard tiles plus the city's lines, loaded on first use.
 // Its own pane keeps the lines below the route and station markers (overlayPane is 400).
 map.createPane("bikeNetwork").style.zIndex = 350;
-var bikeNetworkLines = L.geoJSON(null, {
+const bikeNetworkLines = L.geoJSON(null, {
   pane: "bikeNetwork",
   interactive: false, // map clicks must still set start and destination
   style: function (feature) {
     return bikeNetworkGroup(feature.properties.estado).style;
   },
 });
-var cityLayer = L.layerGroup([osmStandardTiles(), bikeNetworkLines]);
-var bikeNetworkLegend = L.control({ position: "topright" });
+const cityLayer = L.layerGroup([osmStandardTiles(), bikeNetworkLines]);
+const bikeNetworkLegend = L.control({ position: "topright" });
 bikeNetworkLegend.onAdd = function () {
-  var box = L.DomUtil.create("div", "network-legend");
-  var rows = BIKE_NETWORK_GROUPS.map(function (group) {
-    var lineStyle = group.style.dashArray ? "dashed" : "solid";
-    var sample =
+  const box = L.DomUtil.create("div", "network-legend");
+  const rows = BIKE_NETWORK_GROUPS.map(function (group) {
+    const lineStyle = group.style.dashArray ? "dashed" : "solid";
+    const sample =
       group.style.weight + "px " + lineStyle + " " + group.style.color;
     return (
       '<div><span style="border-top:' +
@@ -374,7 +377,7 @@ bikeNetworkLegend.onAdd = function () {
     "<strong>Bike network (City of Valencia)</strong>" + rows.join("");
   return box;
 };
-var bikeNetworkLoaded = false;
+let bikeNetworkLoaded = false;
 cityLayer.on("add", async function () {
   bikeNetworkLegend.addTo(map);
   if (bikeNetworkLoaded) return;
@@ -407,22 +410,22 @@ map.attributionControl.addAttribution(
     ' | Routing: <a href="https://routing.openstreetmap.de/">FOSSGIS OSRM</a>',
 );
 
-var stationLayer = L.layerGroup().addTo(map);
-var pointLayer = L.layerGroup().addTo(map);
-var routeLayer = L.featureGroup().addTo(map);
+const stationLayer = L.layerGroup().addTo(map);
+const pointLayer = L.layerGroup().addTo(map);
+const routeLayer = L.featureGroup().addTo(map);
 
-var startInput = document.getElementById("start-input");
-var destInput = document.getElementById("dest-input");
-var routeForm = document.getElementById("route-form");
-var planButton = document.getElementById("plan-button");
-var messageBox = document.getElementById("message");
-var summaryBox = document.getElementById("summary");
-var panel = document.getElementById("panel");
-var toggleButton = document.getElementById("toggle-panel");
+const startInput = document.getElementById("start-input");
+const destInput = document.getElementById("dest-input");
+const routeForm = document.getElementById("route-form");
+const planButton = document.getElementById("plan-button");
+const messageBox = document.getElementById("message");
+const summaryBox = document.getElementById("summary");
+const panel = document.getElementById("panel");
+const toggleButton = document.getElementById("toggle-panel");
 
 // Points picked on the map, by geolocation or already geocoded. A typed address clears them.
-var startPoint = null;
-var destPoint = null;
+let startPoint = null;
+let destPoint = null;
 
 function escapeHtml(text) {
   return String(text)
@@ -470,10 +473,10 @@ function stationColour(station, now) {
 }
 
 // Popup options shared by all station markers; the class hooks the popup styles.
-var STATION_POPUP_OPTIONS = { className: "station-popup", minWidth: 220 };
+const STATION_POPUP_OPTIONS = { className: "station-popup", minWidth: 220 };
 
 function popupStatHtml(icon, count, label, minimum) {
-  var low = count < minimum ? " low" : "";
+  const low = count < minimum ? " low" : "";
   return (
     '<div class="popup-stat' +
     low +
@@ -490,14 +493,14 @@ function popupStatHtml(icon, count, label, minimum) {
 
 // role: "Pickup station" or "Return station" on the route markers, empty otherwise.
 function stationPopup(station, role) {
-  var now = Date.now();
-  var age = formatAge(now - station.updatedAt);
-  var live = isStationLive(station, now);
-  var status = "Updated " + age;
+  const now = Date.now();
+  const age = formatAge(now - station.updatedAt);
+  const live = isStationLive(station, now);
+  let status = "Updated " + age;
   if (!station.open) status = "Closed";
   else if (!live) status = "No recent data (last update " + age + ")";
   // Counts of a closed or silent station are not reliable: grey them out.
-  var statsClass = live ? "popup-stats" : "popup-stats stale";
+  const statsClass = live ? "popup-stats" : "popup-stats stale";
 
   return (
     (role ? '<div class="popup-role">' + role + "</div>" : "") +
@@ -520,11 +523,11 @@ function stationPopup(station, role) {
 }
 
 function drawStations(stations) {
-  var now = Date.now();
+  const now = Date.now();
   stationLayer.clearLayers();
   stations.forEach(function (station) {
-    var colour = stationColour(station, now);
-    var marker = L.circleMarker([station.lat, station.lon], {
+    const colour = stationColour(station, now);
+    const marker = L.circleMarker([station.lat, station.lon], {
       radius: 5,
       color: "#fff",
       weight: 1,
@@ -571,11 +574,11 @@ function setDestination(point) {
 
 function onMapClick(event) {
   if (planButton.disabled) return; // a plan is running
-  var point = { lat: event.latlng.lat, lon: event.latlng.lng };
+  const point = { lat: event.latlng.lat, lon: event.latlng.lng };
   // Fill the empty field; when both are filled, start again.
-  var startEmpty = !startInput.value.trim();
-  var destFilled = destInput.value.trim() !== "";
-  var pickStart = startEmpty || destFilled;
+  const startEmpty = !startInput.value.trim();
+  const destFilled = destInput.value.trim() !== "";
+  const pickStart = startEmpty || destFilled;
   if (pickStart) {
     destPoint = null;
     destInput.value = "";
@@ -594,7 +597,7 @@ function useMyLocation() {
   navigator.geolocation.getCurrentPosition(
     function (position) {
       clearMessage();
-      var point = {
+      const point = {
         lat: position.coords.latitude,
         lon: position.coords.longitude,
       };
@@ -611,16 +614,16 @@ function useMyLocation() {
 }
 
 // Live location: a pulsing blue dot that follows the user.
-var liveLocationMarker = null;
-var liveLocationWatchId = null;
+let liveLocationMarker = null;
+let liveLocationWatchId = null;
 
 function showLiveLocation(position) {
-  var latLng = [position.coords.latitude, position.coords.longitude];
+  const latLng = [position.coords.latitude, position.coords.longitude];
   if (liveLocationMarker) {
     liveLocationMarker.setLatLng(latLng);
     return;
   }
-  var icon = L.divIcon({
+  const icon = L.divIcon({
     className: "live-location",
     html: '<span class="pulse"></span><span class="dot"></span>',
     iconSize: [18, 18],
@@ -668,7 +671,7 @@ async function resolvePoint(point, text, label) {
 // The same icons as the station cards in the trip summary.
 function stationMarker(station, icon, role) {
   // Draw above the A/B pins: the pickup is often right next to the start.
-  var options = {
+  const options = {
     icon: pinIcon('<span class="pin-icon">' + icon + "</span>", "#d62828"),
     zIndexOffset: 1000,
   };
@@ -680,11 +683,11 @@ function stationMarker(station, icon, role) {
 
 function legHtml(leg) {
   // The roundabout step already names the exit road.
-  var shownSteps = leg.route.steps.filter(function (step) {
-    var type = step.maneuver.type;
+  const shownSteps = leg.route.steps.filter(function (step) {
+    const type = step.maneuver.type;
     return type !== "exit roundabout" && type !== "exit rotary";
   });
-  var steps = shownSteps.map(function (step) {
+  const steps = shownSteps.map(function (step) {
     return "<li>" + escapeHtml(formatStep(step)) + "</li>";
   });
   return (
@@ -707,10 +710,10 @@ function legHtml(leg) {
 }
 
 // Icons from Lucide (ISC licence): "bike" and "square-parking".
-var BIKE_ICON =
+const BIKE_ICON =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18.5" cy="17.5" r="3.5"/>' +
   '<circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>';
-var PARKING_ICON =
+const PARKING_ICON =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/>' +
   '<path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg>';
 
@@ -739,14 +742,14 @@ function stationCardHtml(icon, action, station, count) {
 }
 
 function renderSummary(legs, start, destination, pickup, dropoff) {
-  var totalDistance = 0;
-  var totalDuration = 0;
+  let totalDistance = 0;
+  let totalDuration = 0;
   legs.forEach(function (leg) {
     totalDistance += leg.route.distance;
     totalDuration += leg.route.duration;
   });
 
-  var html = "<h2>Your trip</h2>";
+  let html = "<h2>Your trip</h2>";
   // Show what the geocoder found, so a wrong match is visible.
   if (start.label)
     html += '<div class="place">From: ' + escapeHtml(start.label) + "</div>";
@@ -785,7 +788,7 @@ function renderSummary(legs, start, destination, pickup, dropoff) {
 
 function drawLegs(legs) {
   legs.forEach(function (leg) {
-    var style = leg.mode === "bike" ? BIKE_STYLE : WALK_STYLE;
+    const style = leg.mode === "bike" ? BIKE_STYLE : WALK_STYLE;
     L.polyline(leg.route.coordinates, style).addTo(routeLayer);
   });
 }
@@ -802,20 +805,20 @@ async function planRoute(event) {
     // Store each point as soon as it resolves, so a retry does not geocode it again.
     startPoint = await resolvePoint(startPoint, startInput.value, "start");
     destPoint = await resolvePoint(destPoint, destInput.value, "destination");
-    var start = startPoint;
-    var destination = destPoint;
+    const start = startPoint;
+    const destination = destPoint;
     drawPoints();
 
-    var stations = await fetchStations();
+    const stations = await fetchStations();
     drawStations(stations);
     if (!isNearNetwork(stations, start))
       throw new Error("The start is outside the Valenbisi area.");
     if (!isNearNetwork(stations, destination))
       throw new Error("The destination is outside the Valenbisi area.");
 
-    var now = Date.now();
-    var pickup = choosePickupStation(stations, start, now);
-    var dropoff = chooseDropoffStation(stations, destination, now);
+    const now = Date.now();
+    const pickup = choosePickupStation(stations, start, now);
+    const dropoff = chooseDropoffStation(stations, destination, now);
     if (!pickup)
       throw new Error(
         "No open station with " + MIN_BIKES + "+ bikes available right now.",
@@ -825,9 +828,9 @@ async function planRoute(event) {
         "No open station with " + MIN_DOCKS + "+ free docks right now.",
       );
 
-    var legs;
+    let legs;
     if (shouldWalkOnly(start, destination, pickup, dropoff)) {
-      var walkRoute = await fetchRoute(
+      const walkRoute = await fetchRoute(
         FOOT_ROUTER_URL,
         start,
         destination,
@@ -840,7 +843,7 @@ async function planRoute(event) {
       );
       renderSummary(legs, start, destination, null, null);
     } else {
-      var routes = await Promise.all([
+      const routes = await Promise.all([
         fetchRoute(
           FOOT_ROUTER_URL,
           start,
@@ -883,16 +886,17 @@ function setFormDisabled(disabled) {
 
 // Keep the route clear of the panel: left of it on desktop, above it on phones.
 function paddingOutsidePanel() {
-  var margin = 30;
-  var isPhone = window.matchMedia("(max-width: 600px)").matches;
+  const margin = 30;
+  const isPhone = window.matchMedia("(max-width: 600px)").matches;
   if (isPhone) {
-    var attributionHeight = map.attributionControl.getContainer().offsetHeight;
+    const attributionHeight =
+      map.attributionControl.getContainer().offsetHeight;
     return {
       paddingTopLeft: [margin, attributionHeight + margin],
       paddingBottomRight: [margin, panel.offsetHeight + margin],
     };
   }
-  var panelRight = panel.offsetLeft + panel.offsetWidth;
+  const panelRight = panel.offsetLeft + panel.offsetWidth;
   return {
     paddingTopLeft: [panelRight + margin, margin],
     paddingBottomRight: [margin, margin],
@@ -911,7 +915,7 @@ function clearAll() {
 }
 
 function togglePanel() {
-  var collapsed = panel.classList.toggle("collapsed");
+  const collapsed = panel.classList.toggle("collapsed");
   toggleButton.textContent = collapsed ? "Show" : "Hide";
   toggleButton.setAttribute("aria-expanded", String(!collapsed));
 }
