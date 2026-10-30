@@ -159,6 +159,15 @@ function formatMinutes(seconds) {
   return Math.max(1, Math.round(seconds / 60)) + " min";
 }
 
+function formatAge(ms) {
+  var minutes = Math.round(ms / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return minutes + " min ago";
+  var hours = Math.round(minutes / 60);
+  if (hours < 48) return hours + " h ago";
+  return Math.round(hours / 24) + " days ago";
+}
+
 // Turn one OSRM step into a short English instruction.
 function formatStep(step) {
   var type = step.maneuver.type;
@@ -460,17 +469,53 @@ function stationColour(station, now) {
   return "#dc2626";
 }
 
-function stationPopup(station) {
+// Popup options shared by all station markers; the class hooks the popup styles.
+var STATION_POPUP_OPTIONS = { className: "station-popup", minWidth: 220 };
+
+function popupStatHtml(icon, count, label, minimum) {
+  var low = count < minimum ? " low" : "";
   return (
-    "<strong>" +
-    escapeHtml(station.name) +
-    "</strong><br>" +
+    '<div class="popup-stat' +
+    low +
+    '">' +
+    icon +
+    "<div><strong>" +
+    count +
+    "</strong><span>" +
+    label +
+    "</span></div>" +
+    "</div>"
+  );
+}
+
+// role: "Pickup station" or "Return station" on the route markers, empty otherwise.
+function stationPopup(station, role) {
+  var now = Date.now();
+  var age = formatAge(now - station.updatedAt);
+  var live = isStationLive(station, now);
+  var status = "Updated " + age;
+  if (!station.open) status = "Closed";
+  else if (!live) status = "No recent data (last update " + age + ")";
+  // Counts of a closed or silent station are not reliable: grey them out.
+  var statsClass = live ? "popup-stats" : "popup-stats stale";
+
+  return (
+    (role ? '<div class="popup-role">' + role + "</div>" : "") +
+    '<div class="popup-title">' +
     escapeHtml(station.address) +
-    "<br>" +
-    "Bikes: " +
-    station.bikes +
-    " &middot; Free docks: " +
-    station.docks
+    "</div>" +
+    '<div class="popup-sub">Station ' +
+    station.id +
+    "</div>" +
+    '<div class="' +
+    statsClass +
+    '">' +
+    popupStatHtml(BIKE_ICON, station.bikes, "bikes", MIN_BIKES) +
+    popupStatHtml(PARKING_ICON, station.docks, "free docks", MIN_DOCKS) +
+    "</div>" +
+    '<div class="popup-status">' +
+    status +
+    "</div>"
   );
 }
 
@@ -487,7 +532,7 @@ function drawStations(stations) {
       fillOpacity: 0.9,
       bubblingMouseEvents: false, // clicking a station must not set start/destination
     });
-    marker.bindPopup(stationPopup(station));
+    marker.bindPopup(stationPopup(station), STATION_POPUP_OPTIONS);
     stationLayer.addLayer(marker);
   });
 }
@@ -621,15 +666,16 @@ async function resolvePoint(point, text, label) {
 }
 
 // The same icons as the station cards in the trip summary.
-function stationMarker(station, icon, title, detail) {
-  var popup =
-    "<em>" + title + "</em><br>" + stationPopup(station) + "<br>" + detail;
+function stationMarker(station, icon, role) {
   // Draw above the A/B pins: the pickup is often right next to the start.
   var options = {
     icon: pinIcon('<span class="pin-icon">' + icon + "</span>", "#d62828"),
     zIndexOffset: 1000,
   };
-  return L.marker([station.lat, station.lon], options).bindPopup(popup);
+  return L.marker([station.lat, station.lon], options).bindPopup(
+    stationPopup(station, role),
+    STATION_POPUP_OPTIONS,
+  );
 }
 
 function legHtml(leg) {
@@ -814,18 +860,8 @@ async function planRoute(event) {
         { mode: "bike", title: "Ride to the return station", route: routes[1] },
         { mode: "walk", title: "Walk to destination", route: routes[2] },
       ];
-      stationMarker(
-        pickup,
-        BIKE_ICON,
-        "Pickup station",
-        pickup.bikes + " bikes available",
-      ).addTo(routeLayer);
-      stationMarker(
-        dropoff,
-        PARKING_ICON,
-        "Return station",
-        dropoff.docks + " free docks",
-      ).addTo(routeLayer);
+      stationMarker(pickup, BIKE_ICON, "Pickup station").addTo(routeLayer);
+      stationMarker(dropoff, PARKING_ICON, "Return station").addTo(routeLayer);
       renderSummary(legs, start, destination, pickup, dropoff);
     }
 

@@ -212,7 +212,8 @@ button:disabled {
 }
 
 .station-icon svg,
-.pin-icon svg {
+.pin-icon svg,
+.popup-stat svg {
   display: block;
   width: 100%;
   height: 100%;
@@ -221,6 +222,78 @@ button:disabled {
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* Station popups on the map. */
+.station-popup .leaflet-popup-content {
+  margin: 12px 14px;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.popup-role {
+  margin-bottom: 4px;
+  color: #d62828;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.popup-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.popup-sub,
+.popup-status {
+  color: #555;
+  font-size: 12px;
+}
+
+.popup-stats {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0 8px;
+}
+
+.popup-stat {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.popup-stat svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.popup-stat strong {
+  display: block;
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.popup-stat span {
+  color: #555;
+  font-size: 11px;
+}
+
+/* Fewer than 3 bikes or docks: not usable for pickup or return. */
+.popup-stat.low {
+  background: #fde8e8;
+  color: #9b1c1c;
+}
+
+.popup-stats.stale .popup-stat {
+  background: #f3f4f6;
+  color: #9ca3af;
 }
 
 /* Icon inside the round map pin of the pickup and return stations. */
