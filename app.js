@@ -22,14 +22,15 @@ const MAX_SNAP_DISTANCE_M = 300; // farther from a road or path = point is not r
 const GEOCODER_INTERVAL_MS = 1000; // Nominatim policy: max 1 request per second
 const VALENCIA_CENTER = [39.4699, -0.3763];
 
+// Same colours as --ink and --brand in style.css.
 const WALK_STYLE = {
-  color: "#d62828",
+  color: "#0f172a",
   weight: 7,
   opacity: 0.9,
   dashArray: "1 12",
   lineCap: "round",
 };
-const BIKE_STYLE = { color: "#d62828", weight: 8, opacity: 0.9 };
+const BIKE_STYLE = { color: "#c026d3", weight: 8, opacity: 0.9 };
 
 // Line styles for the "estado" codes of the city bike network, grouped for the legend.
 const BIKE_NETWORK_GROUPS = [
@@ -571,13 +572,13 @@ function drawPoints() {
   pointLayer.clearLayers();
   if (startPoint) {
     L.marker([startPoint.lat, startPoint.lon], {
-      icon: pinIcon("A", "#111827"),
+      icon: pinIcon("A", "#0f172a"),
     })
       .bindPopup(escapeHtml(startPoint.label || "Start"))
       .addTo(pointLayer);
   }
   if (destPoint) {
-    L.marker([destPoint.lat, destPoint.lon], { icon: pinIcon("B", "#7c3aed") })
+    L.marker([destPoint.lat, destPoint.lon], { icon: pinIcon("B", "#c026d3") })
       .bindPopup(escapeHtml(destPoint.label || "Destination"))
       .addTo(pointLayer);
   }
@@ -728,7 +729,7 @@ async function resolvePoint(point, text, label) {
 function stationMarker(station, icon, role) {
   // Draw above the A/B pins: the pickup is often right next to the start.
   const options = {
-    icon: pinIcon('<span class="pin-icon">' + icon + "</span>", "#d62828"),
+    icon: pinIcon('<span class="pin-icon">' + icon + "</span>", "#c026d3"),
     zIndexOffset: 1000,
   };
   return L.marker([station.lat, station.lon], options).bindPopup(
@@ -842,7 +843,18 @@ function renderSummary(legs, start, destination, pickup, dropoff) {
   summaryBox.innerHTML = html;
 }
 
+// A white outline under each line keeps it readable on busy map styles (CyclOSM).
+// All outlines go first, so no outline covers the end of another leg.
 function drawLegs(legs) {
+  legs.forEach(function (leg) {
+    const style = leg.mode === "bike" ? BIKE_STYLE : WALK_STYLE;
+    const outline = Object.assign({}, style, {
+      color: "#fff",
+      weight: style.weight + 4,
+      opacity: 1,
+    });
+    L.polyline(leg.route.coordinates, outline).addTo(routeLayer);
+  });
   legs.forEach(function (leg) {
     const style = leg.mode === "bike" ? BIKE_STYLE : WALK_STYLE;
     L.polyline(leg.route.coordinates, style).addTo(routeLayer);

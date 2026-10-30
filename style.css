@@ -4,18 +4,19 @@
 
 /* Colour roles. The map colours (pins, lines, station dots) live in app.js and use the same values. */
 :root {
-  --brand: #d62828; /* Valencia red: primary action, bike route, pickup and return stations */
-  --brand-tint: #fde8e8;
-  --brand-ink: #9b1c1c;
-  --ink: #222;
-  --muted: #555;
-  --start: #111827; /* "A" pin */
-  --dest: #7c3aed; /* "B" pin */
+  --brand: #c026d3; /* brand magenta: logo, bike route, pickup and return stations, focus */
+  --brand-tint: #fae8ff;
+  --error-tint: #fde8e8;
+  --error-ink: #9b1c1c;
+  --ink: #0f172a; /* text and primary action */
+  --muted: #64748b; /* helper text */
+  --start: #0f172a; /* "A" pin */
+  --dest: var(--brand); /* "B" pin, also the logo accent */
 }
 
 ::selection {
   background: var(--brand-tint);
-  color: var(--brand-ink);
+  color: var(--ink);
 }
 
 :focus-visible {
@@ -70,7 +71,7 @@ body {
 }
 
 #panel-header h1 span {
-  color: var(--brand);
+  color: var(--dest);
 }
 
 #panel-body {
@@ -94,10 +95,16 @@ label {
 input[type="text"] {
   width: 100%;
   padding: 7px 8px;
-  border: 1px solid #bbb;
+  border: 1px solid #cbd5e1;
   border-radius: 5px;
+  background: #fff;
+  color: var(--ink);
   font-size: 15px;
   caret-color: var(--brand);
+}
+
+input[type="text"]::placeholder {
+  color: var(--muted);
 }
 
 input[type="text"]:focus-visible {
@@ -139,7 +146,7 @@ button {
   padding: 7px 10px;
   border: 0;
   border-radius: 5px;
-  background: var(--brand);
+  background: var(--ink);
   color: #fff;
   font-size: 14px;
   cursor: pointer;
@@ -149,8 +156,8 @@ button {
 button.secondary,
 #locate-button,
 #toggle-panel {
-  background: #eee;
-  color: #222;
+  background: #f1f5f9;
+  color: #334155;
 }
 
 button:disabled {
@@ -165,7 +172,7 @@ button:disabled {
 .hint {
   margin: 6px 0 10px;
   font-size: 12px;
-  color: #666;
+  color: var(--muted);
 }
 
 #message {
@@ -178,8 +185,8 @@ button:disabled {
 #message.error {
   padding: 8px;
   border-radius: 5px;
-  background: var(--brand-tint);
-  color: var(--brand-ink);
+  background: var(--error-tint);
+  color: var(--error-ink);
 }
 
 #message.info {
@@ -224,7 +231,7 @@ button:disabled {
 
 .disclaimer {
   margin: 12px 0 0;
-  color: #555;
+  color: var(--muted);
   font-size: 12px;
 }
 
@@ -235,14 +242,14 @@ button:disabled {
   border-radius: 5px;
 }
 
-/* Swatch that matches the line on the map: dotted red walk, solid red bike. */
+/* Swatch that matches the line on the map: dotted dark walk, solid magenta bike. */
 .leg-title::before {
   content: "";
   display: inline-block;
   width: 18px;
   margin-right: 6px;
   vertical-align: middle;
-  border-top: 4px dotted var(--brand);
+  border-top: 4px dotted var(--ink);
 }
 
 .leg.bike .leg-title::before {
@@ -363,8 +370,8 @@ button:disabled {
 
 /* Fewer than 3 bikes or docks: not usable for pickup or return. */
 .popup-stat.low {
-  background: var(--brand-tint);
-  color: var(--brand-ink);
+  background: var(--error-tint);
+  color: var(--error-ink);
 }
 
 .popup-actions {
@@ -383,7 +390,7 @@ button:disabled {
   min-height: 36px;
 }
 
-/* White ring keeps the badge apart from the red button. */
+/* White ring keeps the badge apart from the dark button. */
 .popup-actions .ab-badge {
   box-shadow: 0 0 0 1.5px #fff;
 }

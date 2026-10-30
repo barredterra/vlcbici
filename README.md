@@ -15,7 +15,7 @@ A small static web app that plans a trip in Valencia with walking and Valenbisi 
    - walk from the start to the pickup station,
    - ride from the pickup station to the return station,
    - walk from the return station to the destination.
-6. It shows the routes on the map (walking as red dots, bike as a solid red line), a summary with distance and time per leg, and turn-by-turn directions.
+6. It shows the routes on the map (walking as dark dots, bike as a solid magenta line), a summary with distance and time per leg, and turn-by-turn directions.
 
 If the pickup and return stations are the same, or if walking to and from the stations is longer than walking directly, the app shows only a walking route.
 
