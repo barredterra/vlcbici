@@ -361,7 +361,8 @@ bikeNetworkLegend.onAdd = function () {
       "</div>"
     );
   });
-  box.innerHTML = "<strong>City bike network</strong>" + rows.join("");
+  box.innerHTML =
+    "<strong>Bike network (City of Valencia)</strong>" + rows.join("");
   return box;
 };
 var bikeNetworkLoaded = false;
@@ -386,9 +387,9 @@ cityLayer.on("remove", function () {
 standardLayer.addTo(map);
 L.control
   .layers({
-    Standard: standardLayer,
-    Cycling: cyclingLayer,
-    "City bike network": cityLayer,
+    "Street map": standardLayer,
+    "Cycling map (OpenStreetMap)": cyclingLayer,
+    "Bike network (City of Valencia)": cityLayer,
   })
   .addTo(map);
 // These credits apply to all map styles.
