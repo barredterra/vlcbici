@@ -61,3 +61,10 @@ Do not open `index.html` directly from disk (`file://`). The browser then sends 
 - `index.html`: page layout.
 - `style.css`: styles, including the mobile layout.
 - `app.js`: all logic. Pure functions (distance, station selection, step text) are at the top. Network calls and the map/UI code follow.
+
+## License
+
+The code is under the [MIT License](LICENSE). It does not cover the data that the app loads:
+
+- Map data: © OpenStreetMap contributors, under the [ODbL](https://www.openstreetmap.org/copyright).
+- Station availability and bike network: Valencia Open Data, under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
