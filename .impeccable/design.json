@@ -77,8 +77,8 @@
       "name": "Secondary Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Supporting actions: \"My location\", \"Clear\", \"Hide\".",
-      "html": "<button class=\"ds-btn-secondary\" type=\"button\">My location</button>",
+      "description": "Supporting actions: \"Clear\"; also the base of the icon buttons.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Clear</button>",
       "css": ".ds-btn-secondary { padding: 7px 10px; border: 0; border-radius: 5px; background: #f1f5f9; color: #334155; font: 14px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; cursor: pointer; white-space: nowrap; } .ds-btn-secondary:focus-visible { outline: 2px solid #c026d3; outline-offset: 2px; } @media (pointer: coarse) { .ds-btn-secondary { min-height: 44px; } }"
     },
     {

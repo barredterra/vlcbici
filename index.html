@@ -21,8 +21,18 @@
     <aside id="panel">
       <header id="panel-header">
         <h1>vlc<span>bici</span></h1>
-        <button id="toggle-panel" type="button" aria-expanded="true">
-          Hide
+        <!-- Icons from Lucide (ISC licence): "chevron-down" and "locate-fixed". -->
+        <button
+          id="toggle-panel"
+          class="icon-button"
+          type="button"
+          aria-expanded="true"
+          aria-label="Hide panel"
+          title="Hide panel"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
         </button>
       </header>
 
@@ -38,8 +48,18 @@
               placeholder="Address or pick on the map"
               autocomplete="off"
             />
-            <button id="locate-button" type="button" title="Use my location">
-              My location
+            <button
+              id="locate-button"
+              class="icon-button"
+              type="button"
+              aria-label="Use my location"
+              title="Use my location"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2 12h3M19 12h3M12 2v3M12 19v3" />
+                <circle cx="12" cy="12" r="7" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
             </button>
           </div>
 

@@ -1035,7 +1035,9 @@ function clearAll() {
 
 function togglePanel() {
   const collapsed = panel.classList.toggle("collapsed");
-  toggleButton.textContent = collapsed ? "Show" : "Hide";
+  const label = collapsed ? "Show panel" : "Hide panel";
+  toggleButton.setAttribute("aria-label", label);
+  toggleButton.title = label;
   toggleButton.setAttribute("aria-expanded", String(!collapsed));
 }
 

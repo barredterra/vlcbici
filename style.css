@@ -180,6 +180,33 @@ button:disabled {
   flex: 1;
 }
 
+/* Square button with a Lucide icon instead of a text label. */
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px;
+}
+
+.icon-button svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The caret points where the panel goes: up to hide it at the top of the screen. */
+#toggle-panel svg {
+  transform: rotate(180deg);
+}
+#panel.collapsed #toggle-panel svg {
+  transform: none;
+}
+
 .hint {
   margin: 6px 0 10px;
   font-size: 12px;
@@ -475,6 +502,14 @@ button:disabled {
     border-radius: 10px 10px 0 0;
   }
 
+  /* The sheet sits at the bottom: down to hide, up to show. */
+  #toggle-panel svg {
+    transform: none;
+  }
+  #panel.collapsed #toggle-panel svg {
+    transform: rotate(180deg);
+  }
+
   /* The attribution sits top right (see app.js); keep it clear of the zoom buttons. */
   .leaflet-control-attribution {
     max-width: calc(100vw - 54px);
@@ -487,6 +522,10 @@ button:disabled {
   button,
   input[type="text"] {
     min-height: 44px;
+  }
+
+  .icon-button {
+    min-width: 44px;
   }
 
   input[type="text"] {

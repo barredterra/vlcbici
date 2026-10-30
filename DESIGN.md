@@ -149,7 +149,7 @@ A neutral slate instrument panel with a single magenta course line, and a fixed 
 - **Slate Secondary Text** (#334155): text on secondary buttons.
 - **Slate Muted** (#64748b): helper text, the station legend and the disclaimer.
 - **Slate Border** (#cbd5e1): input borders.
-- **Slate Soft** (#f1f5f9): secondary button fill ("My location", "Clear", "Hide").
+- **Slate Soft** (#f1f5f9): secondary button fill ("Clear" and the icon buttons).
 - **Panel White** (#ffffff): the panel, inputs, cards and map legends.
 
 ### Status (map data, fixed)
@@ -221,10 +221,11 @@ Gently rounded and plain. Controls, inputs, cards and messages use a 5px radius;
 
 - **Shape:** gently rounded (5px), no border.
 - **Primary:** Slate Ink fill, white text, 14px, 7px × 10px padding. "Plan route" stretches to fill its row. The popup "Start" / "Destination" buttons use the same style with an A/B badge inside (white ring to separate it from the dark fill) and a 36px minimum height for touch.
-- **Secondary:** Slate Soft fill with Slate Secondary Text ("My location", "Clear", "Hide").
+- **Secondary:** Slate Soft fill with Slate Secondary Text ("Clear").
+- **Icon:** a secondary button with an 18px Lucide icon instead of a label, square with 7px padding, and an `aria-label` plus a `title` tooltip that name the action: the crosshair "Use my location" and the panel caret. The caret points where the panel goes: up to hide on desktop, down to hide the phone sheet.
 - **Focus:** 2px Route Magenta outline, 2px offset.
 - **Disabled:** 60% opacity and a wait cursor while a plan runs.
-- **Touch:** on touch screens (`pointer: coarse`) every button and text input is at least 44px tall.
+- **Touch:** on touch screens (`pointer: coarse`) every button and text input is at least 44px tall, and icon buttons at least 44px wide.
 
 ### Inputs / Fields
 
