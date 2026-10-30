@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-30T23:59:00Z",
+  "title": "Design System: vlcbici",
+  "extensions": {
+    "colorMeta": {
+      "route-magenta": {
+        "role": "primary",
+        "displayName": "Route Magenta",
+        "canonical": "#c026d3",
+        "tonalRamp": ["#4a044e", "#701a75", "#86198f", "#a21caf", "#c026d3", "#d946ef", "#f0abfc", "#fae8ff"]
+      },
+      "route-magenta-tint": { "role": "primary", "displayName": "Route Magenta Tint", "canonical": "#fae8ff" },
+      "slate-ink": {
+        "role": "neutral",
+        "displayName": "Slate Ink",
+        "canonical": "#0f172a",
+        "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#f1f5f9"]
+      },
+      "slate-text-secondary": { "role": "neutral", "displayName": "Slate Secondary Text", "canonical": "#334155" },
+      "slate-muted": { "role": "neutral", "displayName": "Slate Muted", "canonical": "#64748b" },
+      "slate-border": { "role": "neutral", "displayName": "Slate Border", "canonical": "#cbd5e1" },
+      "slate-soft": { "role": "neutral", "displayName": "Slate Soft", "canonical": "#f1f5f9" },
+      "panel-white": { "role": "neutral", "displayName": "Panel White", "canonical": "#ffffff" },
+      "error-ink": {
+        "role": "status",
+        "displayName": "Error Ink",
+        "canonical": "#9b1c1c",
+        "tonalRamp": ["#450a0a", "#7f1d1d", "#9b1c1c", "#b91c1c", "#dc2626", "#f87171", "#fecaca", "#fde8e8"]
+      },
+      "error-tint": { "role": "status", "displayName": "Error Tint", "canonical": "#fde8e8" },
+      "info-ink": { "role": "status", "displayName": "Info Ink", "canonical": "#1e3a8a" },
+      "info-tint": { "role": "status", "displayName": "Info Tint", "canonical": "#eef4ff" },
+      "station-ready": { "role": "data", "displayName": "Station Ready", "canonical": "#16a34a" },
+      "station-few-docks": { "role": "data", "displayName": "Few Docks", "canonical": "#ea580c" },
+      "station-few-bikes": { "role": "data", "displayName": "Few Bikes", "canonical": "#eab308" },
+      "station-few-both": { "role": "data", "displayName": "Few of Both", "canonical": "#dc2626" },
+      "station-stale": { "role": "data", "displayName": "Closed or Stale", "canonical": "#9ca3af" },
+      "live-location": { "role": "data", "displayName": "Live Location", "canonical": "#1a73e8" },
+      "network-lane": { "role": "data", "displayName": "Network: Bike Lane", "canonical": "#1d4ed8" },
+      "network-shared": { "role": "data", "displayName": "Network: Shared with Traffic", "canonical": "#0891b2" },
+      "network-pedestrian": { "role": "data", "displayName": "Network: Pedestrian Street", "canonical": "#6b7280" },
+      "network-works": { "role": "data", "displayName": "Network: Closed for Works", "canonical": "#f59e0b" }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Headline", "purpose": "The vlcbici wordmark in the panel header." },
+      "title": { "displayName": "Title", "purpose": "\"Your trip\", leg titles, popup station names (14px)." },
+      "body": { "displayName": "Body", "purpose": "Inputs and general copy; buttons at 14px." },
+      "label": { "displayName": "Label", "purpose": "Field labels." },
+      "caption": { "displayName": "Caption", "purpose": "Helper text, station legend, disclaimer." },
+      "eyebrow": { "displayName": "Eyebrow", "purpose": "Uppercase role line in pickup/return popups." },
+      "stat": { "displayName": "Stat", "purpose": "Bike and dock counts in station popups." }
+    },
+    "shadows": [
+      { "name": "floating-panel", "value": "0 2px 10px rgba(0, 0, 0, 0.25)", "purpose": "The panel and bottom sheet floating over the map." },
+      { "name": "map-legend", "value": "0 1px 4px rgba(0, 0, 0, 0.3)", "purpose": "Map legend control." },
+      { "name": "map-pin", "value": "0 1px 4px rgba(0, 0, 0, 0.4)", "purpose": "A/B pins, station pins, live-location dot (with a 2px white border)." }
+    ],
+    "motion": [
+      { "name": "live-pulse", "value": "2s ease-out infinite (scale 1 to 3, opacity 0.8 to 0)", "purpose": "Halo of the live-location dot; static under prefers-reduced-motion." }
+    ],
+    "breakpoints": [{ "name": "phone", "value": "600px" }]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main action, e.g. \"Plan route\"; also the Start/Destination buttons in station popups.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Plan route</button>",
+      "css": ".ds-btn-primary { padding: 7px 10px; border: 0; border-radius: 5px; background: #0f172a; color: #fff; font: 14px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; cursor: pointer; white-space: nowrap; } .ds-btn-primary:focus-visible { outline: 2px solid #c026d3; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.6; cursor: wait; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Supporting actions: \"My location\", \"Clear\", \"Hide\".",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">My location</button>",
+      "css": ".ds-btn-secondary { padding: 7px 10px; border: 0; border-radius: 5px; background: #f1f5f9; color: #334155; font: 14px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; cursor: pointer; white-space: nowrap; } .ds-btn-secondary:focus-visible { outline: 2px solid #c026d3; outline-offset: 2px; }"
+    },
+    {
+      "name": "Address Field",
+      "kind": "input",
+      "refersTo": "input-text",
+      "description": "Start or destination with its A/B badge label.",
+      "html": "<label class=\"ds-label\" for=\"ds-start\"><span class=\"ds-badge\">A</span>Start</label><input id=\"ds-start\" class=\"ds-input\" type=\"text\" placeholder=\"Address or click the map\">",
+      "css": ".ds-label { display: flex; align-items: center; gap: 6px; margin: 6px 0 3px; font: 600 13px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #0f172a; } .ds-badge { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #0f172a; color: #fff; font-size: 11px; font-weight: 700; } .ds-input { width: 100%; box-sizing: border-box; padding: 7px 8px; border: 1px solid #cbd5e1; border-radius: 5px; background: #fff; color: #0f172a; font: 15px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; caret-color: #c026d3; } .ds-input::placeholder { color: #64748b; } .ds-input:focus-visible { border-color: #c026d3; outline: 1px solid #c026d3; }"
+    },
+    {
+      "name": "A/B Badges",
+      "kind": "custom",
+      "refersTo": "badge-start",
+      "description": "Mirror the A/B pins on the map in labels and popup buttons.",
+      "html": "<span class=\"ds-ab\">A</span> <span class=\"ds-ab ds-ab-dest\">B</span>",
+      "css": ".ds-ab { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #0f172a; color: #fff; font: 700 11px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; } .ds-ab-dest { background: #c026d3; }"
+    },
+    {
+      "name": "Station Card",
+      "kind": "card",
+      "refersTo": "station-card",
+      "description": "Pickup or return station in the trip summary.",
+      "html": "<div class=\"ds-station\"><div class=\"ds-station-icon\"><svg viewBox=\"0 0 24 24\"><circle cx=\"18.5\" cy=\"17.5\" r=\"3.5\"/><circle cx=\"5.5\" cy=\"17.5\" r=\"3.5\"/><circle cx=\"15\" cy=\"5\" r=\"1\"/><path d=\"M12 17.5V14l-3-3 4-3 2 3h2\"/></svg></div><div class=\"ds-station-text\"><div class=\"ds-station-action\">Pick up a bike</div><div class=\"ds-station-address\">Plaza del Ayuntamiento</div><div class=\"ds-station-action\">Station 1</div></div><div class=\"ds-station-count\">12 bikes</div></div>",
+      "css": ".ds-station { display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid #e5e5e5; border-radius: 5px; font: 15px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #0f172a; } .ds-station-icon { flex: none; width: 36px; height: 36px; padding: 6px; box-sizing: border-box; border-radius: 50%; background: #fae8ff; color: #c026d3; } .ds-station-icon svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; } .ds-station-text { flex: 1; } .ds-station-action { color: #64748b; font-size: 12px; } .ds-station-address { font-weight: 600; } .ds-station-count { font-weight: 600; font-size: 13px; }"
+    },
+    {
+      "name": "Leg Card",
+      "kind": "card",
+      "description": "One leg of the trip with a swatch that copies the map line.",
+      "html": "<div class=\"ds-leg\"><div class=\"ds-leg-title\"><span class=\"ds-swatch ds-swatch-bike\"></span>Ride to the return station</div><div class=\"ds-leg-meta\">4.46 km · 20 min</div></div><div class=\"ds-leg\"><div class=\"ds-leg-title\"><span class=\"ds-swatch\"></span>Walk to destination</div><div class=\"ds-leg-meta\">0.22 km · 3 min</div></div>",
+      "css": ".ds-leg { margin-top: 8px; padding: 6px 8px; background: #fafafa; border-radius: 5px; font: 15px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #0f172a; } .ds-leg-title { font-weight: 600; } .ds-swatch { display: inline-block; width: 18px; margin-right: 6px; vertical-align: middle; border-top: 4px dotted #0f172a; } .ds-swatch-bike { border-top-style: solid; border-top-color: #c026d3; } .ds-leg-meta { color: #64748b; font-size: 13px; }"
+    },
+    {
+      "name": "Message",
+      "kind": "custom",
+      "refersTo": "message-error",
+      "description": "Error and info messages under the form.",
+      "html": "<div class=\"ds-msg ds-msg-error\">The start is outside the Valenbisi area.</div><div class=\"ds-msg ds-msg-info\">The start station has only 2 bikes.</div>",
+      "css": ".ds-msg { margin-top: 8px; padding: 8px; border-radius: 5px; font: 15px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; } .ds-msg-error { background: #fde8e8; color: #9b1c1c; } .ds-msg-info { background: #eef4ff; color: #1e3a8a; }"
+    },
+    {
+      "name": "Station Legend",
+      "kind": "custom",
+      "description": "Key for the station dot colours.",
+      "html": "<ul class=\"ds-legend\"><li style=\"--dot:#16a34a\">Bikes and docks</li><li style=\"--dot:#ea580c\">Few docks</li><li style=\"--dot:#eab308\">Few bikes</li><li style=\"--dot:#dc2626\">Few of both</li><li style=\"--dot:#9ca3af\">Closed or no data</li></ul>",
+      "css": ".ds-legend { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: 0; padding: 0; list-style: none; color: #64748b; font: 12px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; } .ds-legend li::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 50%; background: var(--dot); vertical-align: -1px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Pocket Wayfinder",
+    "overview": "vlcbici is a calm guide in a stranger's pocket. The map leads; the panel quietly says what to do next. A visitor who does not know Valencia stands on a street with a phone in one hand and needs three answers fast: where to get a bike, where to ride, where to give it back. Every visual decision serves that glance.\n\nThe system is native map-app plain. It uses the platform's own font, flat white panels and controls that look like the ones people already know from map apps. The brand does not decorate; it lives in one place: the magenta course of the bike ride and the stations that start and end it. Slate carries the text and the main action. Status colours appear only where they report real station data.\n\nDensity is moderate and compact: a 360px floating panel on desktop, a bottom sheet on phones, small type steps, short gaps. Nothing in the panel competes with the map for attention.",
+    "keyCharacteristics": [
+      "Map first; the panel is a quiet tool on top of it.",
+      "One brand colour, Route Magenta, reserved for the planned bike course and its stations.",
+      "Slate ink for text and the primary action, never the brand colour.",
+      "Colour always has a job: wayfinding (A/B), course, or station status.",
+      "System font, flat surfaces, one soft shadow for the floating panel."
+    ],
+    "rules": [
+      { "name": "The One Course Rule", "body": "Route Magenta marks the planned bike course and the stations that bound it. It is not a button colour, a heading colour or a decoration. If something magenta is not part of the trip or a focus/selection state, it is wrong.", "section": "colors" },
+      { "name": "The Data Owns Its Colours Rule", "body": "Green, orange, yellow, red and grey belong to station status, blue and cyan to bike lanes. New UI never reuses them for anything else.", "section": "colors" },
+      { "name": "The Pin Equals Badge Rule", "body": "The A/B badges in the panel and popups always use the same colours as the A/B pins on the map. Change one, change both (`style.css` tokens and `app.js` pin colours).", "section": "colors" },
+      { "name": "The Small Steps Rule", "body": "Sizes stay within 11–18px. Hierarchy comes from weight (400/600/700) and colour (ink vs. muted), not from big size jumps; the map is the only large element.", "section": "typography" },
+      { "name": "The Float Only Rule", "body": "A shadow means \"this sits on the map\". Nothing inside the panel gets one.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep Route Magenta (#c026d3) for the bike course, its stations, the \"B\" mark, the logo accent and focus.",
+      "Do use Slate Ink (#0f172a) for the primary action and body text.",
+      "Do keep A/B badges and A/B map pins in the same colours.",
+      "Do keep every status colour paired with text: the legend, popup labels or a message.",
+      "Do use the 5px radius for controls and cards, full circles for anything that marks a point.",
+      "Do use the existing neutral tokens (`--ink`, `--muted`) for new text. Some older rules still use plain greys (#555, #fafafa, #e5e5e5, #f3f4f6); move them to slate tokens when you touch them."
+    ],
+    "donts": [
+      "Don't use blue or cyan for the route or the brand; the CyclOSM and city network layers already draw bike lanes in those colours.",
+      "Don't use green, orange, yellow, red or grey for anything except station status and errors.",
+      "Don't put shadows on elements inside the panel.",
+      "Don't use web fonts or large display type; the map is the hero.",
+      "Don't use Valenbisi, JCDecaux or City of Valencia logos or brand styling; the app is unofficial."
+    ]
+  }
+}
