@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-30T23:59:00Z",
+  "generatedAt": "2026-10-31T00:30:00Z",
   "title": "Design System: vlcbici",
   "extensions": {
     "colorMeta": {
@@ -45,7 +45,7 @@
     "typographyMeta": {
       "headline": { "displayName": "Headline", "purpose": "The vlcbici wordmark in the panel header." },
       "title": { "displayName": "Title", "purpose": "\"Your trip\", leg titles, popup station names (14px)." },
-      "body": { "displayName": "Body", "purpose": "Inputs and general copy; buttons at 14px." },
+      "body": { "displayName": "Body", "purpose": "Inputs and general copy (inputs 16px on touch screens); buttons at 14px." },
       "label": { "displayName": "Label", "purpose": "Field labels." },
       "caption": { "displayName": "Caption", "purpose": "Helper text, station legend, disclaimer." },
       "eyebrow": { "displayName": "Eyebrow", "purpose": "Uppercase role line in pickup/return popups." },
@@ -59,7 +59,10 @@
     "motion": [
       { "name": "live-pulse", "value": "2s ease-out infinite (scale 1 to 3, opacity 0.8 to 0)", "purpose": "Halo of the live-location dot; static under prefers-reduced-motion." }
     ],
-    "breakpoints": [{ "name": "phone", "value": "600px" }]
+    "breakpoints": [
+      { "name": "phone", "value": "600px" },
+      { "name": "touch", "value": "(pointer: coarse)" }
+    ]
   },
   "components": [
     {
@@ -68,7 +71,7 @@
       "refersTo": "button-primary",
       "description": "The main action, e.g. \"Plan route\"; also the Start/Destination buttons in station popups.",
       "html": "<button class=\"ds-btn-primary\" type=\"button\">Plan route</button>",
-      "css": ".ds-btn-primary { padding: 7px 10px; border: 0; border-radius: 5px; background: #0f172a; color: #fff; font: 14px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; cursor: pointer; white-space: nowrap; } .ds-btn-primary:focus-visible { outline: 2px solid #c026d3; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.6; cursor: wait; }"
+      "css": ".ds-btn-primary { padding: 7px 10px; border: 0; border-radius: 5px; background: #0f172a; color: #fff; font: 14px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; cursor: pointer; white-space: nowrap; } .ds-btn-primary:focus-visible { outline: 2px solid #c026d3; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.6; cursor: wait; } @media (pointer: coarse) { .ds-btn-primary { min-height: 44px; } }"
     },
     {
       "name": "Secondary Button",
@@ -76,15 +79,15 @@
       "refersTo": "button-secondary",
       "description": "Supporting actions: \"My location\", \"Clear\", \"Hide\".",
       "html": "<button class=\"ds-btn-secondary\" type=\"button\">My location</button>",
-      "css": ".ds-btn-secondary { padding: 7px 10px; border: 0; border-radius: 5px; background: #f1f5f9; color: #334155; font: 14px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; cursor: pointer; white-space: nowrap; } .ds-btn-secondary:focus-visible { outline: 2px solid #c026d3; outline-offset: 2px; }"
+      "css": ".ds-btn-secondary { padding: 7px 10px; border: 0; border-radius: 5px; background: #f1f5f9; color: #334155; font: 14px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; cursor: pointer; white-space: nowrap; } .ds-btn-secondary:focus-visible { outline: 2px solid #c026d3; outline-offset: 2px; } @media (pointer: coarse) { .ds-btn-secondary { min-height: 44px; } }"
     },
     {
       "name": "Address Field",
       "kind": "input",
       "refersTo": "input-text",
       "description": "Start or destination with its A/B badge label.",
-      "html": "<label class=\"ds-label\" for=\"ds-start\"><span class=\"ds-badge\">A</span>Start</label><input id=\"ds-start\" class=\"ds-input\" type=\"text\" placeholder=\"Address or click the map\">",
-      "css": ".ds-label { display: flex; align-items: center; gap: 6px; margin: 6px 0 3px; font: 600 13px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #0f172a; } .ds-badge { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #0f172a; color: #fff; font-size: 11px; font-weight: 700; } .ds-input { width: 100%; box-sizing: border-box; padding: 7px 8px; border: 1px solid #cbd5e1; border-radius: 5px; background: #fff; color: #0f172a; font: 15px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; caret-color: #c026d3; } .ds-input::placeholder { color: #64748b; } .ds-input:focus-visible { border-color: #c026d3; outline: 1px solid #c026d3; }"
+      "html": "<label class=\"ds-label\" for=\"ds-start\"><span class=\"ds-badge\">A</span>Start</label><input id=\"ds-start\" class=\"ds-input\" type=\"text\" placeholder=\"Address or pick on the map\">",
+      "css": ".ds-label { display: flex; align-items: center; gap: 6px; margin: 6px 0 3px; font: 600 13px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #0f172a; } .ds-badge { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #0f172a; color: #fff; font-size: 11px; font-weight: 700; } .ds-input { width: 100%; box-sizing: border-box; padding: 7px 8px; border: 1px solid #cbd5e1; border-radius: 5px; background: #fff; color: #0f172a; font: 15px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; caret-color: #c026d3; } .ds-input::placeholder { color: #64748b; } .ds-input:focus-visible { border-color: #c026d3; outline: 1px solid #c026d3; } @media (pointer: coarse) { .ds-input { min-height: 44px; font-size: 16px; } }"
     },
     {
       "name": "A/B Badges",
