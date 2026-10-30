@@ -105,12 +105,12 @@ components:
   message-error:
     backgroundColor: "{colors.error-tint}"
     textColor: "{colors.error-ink}"
-    rounded: "{rounded.sm}"
+    rounded: "{rounded.md}"
     padding: "8px"
   message-info:
     backgroundColor: "{colors.info-tint}"
     textColor: "{colors.info-ink}"
-    rounded: "{rounded.sm}"
+    rounded: "{rounded.md}"
     padding: "8px"
 ---
 
@@ -124,15 +124,15 @@ vlcbici is a calm guide in a stranger's pocket. The map leads; the panel quietly
 
 The system is native map-app plain. It uses the platform's own font, flat white panels and controls that look like the ones people already know from map apps. The brand does not decorate; it lives in one place: the magenta course of the bike ride and the stations that start and end it. Slate carries the text and the main action. Status colours appear only where they report real station data.
 
-Density is moderate and compact: a 360px floating panel on desktop, a bottom sheet on phones, small type steps, short gaps. Nothing in the panel competes with the map for attention.
+Density is moderate and compact: a column of 360px floating cards on desktop, the same cards stacked at the bottom on phones, small type steps, short gaps. Nothing in the cards competes with the map for attention.
 
 **Key Characteristics:**
 
-- Map first; the panel is a quiet tool on top of it.
+- Map first; the panel is a quiet stack of cards on top of it.
 - One brand colour, Route Magenta, reserved for the planned bike course and its stations.
 - Slate ink for text and the primary action, never the brand colour.
 - Colour always has a job: wayfinding (A/B), course, or station status.
-- System font, flat surfaces, one soft shadow for the floating panel.
+- System font, flat surfaces, one soft shadow for everything that floats on the map.
 
 ## Colors
 
@@ -150,7 +150,7 @@ A neutral slate instrument panel with a single magenta course line, and a fixed 
 - **Slate Muted** (#64748b): helper text, the station legend and the disclaimer.
 - **Slate Border** (#cbd5e1): input borders.
 - **Slate Soft** (#f1f5f9): secondary button fill ("Clear" and the icon buttons).
-- **Panel White** (#ffffff): the panel, inputs, cards and map legends.
+- **Panel White** (#ffffff): the panel cards, inputs, station cards and map legends.
 
 ### Status (map data, fixed)
 
@@ -190,31 +190,31 @@ A neutral slate instrument panel with a single magenta course line, and a fixed 
 
 ## Layout
 
-The map fills the viewport. The panel floats above it.
+The map fills the viewport. The panel floats above it as a transparent column of white cards: the header (wordmark and caret), the route form, the trip (only after a plan) and the station legend with the disclaimer. Messages float between the form and the trip. The map shows through the 10px gaps.
 
-- **Desktop:** a 360px panel, 10px from the top and the left, with a scrolling body and a max height of the viewport minus 20px.
-- **Phone (≤600px):** the panel becomes a full-width bottom sheet, at most 55% of the height, with 10px top corners. The map attribution moves to the top right so the sheet never covers it. The sheet's white continues under the home indicator (`safe-area-inset-bottom`); the map controls and the desktop panel keep clear of the notch. After a plan, the panel scrolls to the result, because the form fills most of a short panel.
+- **Desktop:** 360px cards, 10px from the top and the left; the cards below the header scroll, and the column never grows past the viewport.
+- **Phone (≤600px):** the cards stack at the bottom, full width minus 10px on each side, in at most 55% of the height. The map attribution moves to the top right so the sheet never covers it. The cards stay above the home indicator (`safe-area-inset-bottom`); the map controls and the desktop panel keep clear of the notch. After a plan, the panel scrolls to the result, because the form fills most of a short panel.
 - **Map controls:** attribution, zoom buttons and layer switcher stack in one column at the top right, so the panel has the left side and the sheet never covers them. Phones hide the zoom buttons; pinch zoom replaces them.
 - When a route is drawn, the map fits the route into the space the panel leaves free (to the right on desktop, above the sheet on phones) and keeps it clear of the buttons on the right.
-- **Spacing rhythm:** 6px inside rows and between a label and its field, 8px between cards and list items, 10–12px for panel padding and section gaps.
+- **Spacing rhythm:** 6px inside rows and between a label and its field, 8px between list items and the cards inside the trip, 10px between and around the floating cards, 10–12px inside a card.
 
 ## Elevation & Depth
 
-Flat by default. Only things that float above the map get a shadow; everything inside the panel is flat and separated by tint, border or space.
+Flat by default. Only things that float above the map get a shadow; everything inside a card is flat and separated by tint, border or space.
 
 ### Shadow Vocabulary
 
-- **Floating panel** (`box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25)`): the panel / bottom sheet.
+- **Floating card** (`box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25)`): the panel header, the panel cards and messages.
 - **Map legend** (`box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3)`): the bike network legend on the map.
 - **Map pin** (`box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4)` with a 2px white border): A/B pins, station pins and the live-location dot.
 
 ### Named Rules
 
-**The Float Only Rule.** A shadow means "this sits on the map". Nothing inside the panel gets one.
+**The Float Only Rule.** A shadow means "this sits on the map". Nothing inside a card gets one.
 
 ## Shapes
 
-Gently rounded and plain. Controls, inputs, cards and messages use a 5px radius; the panel uses 8px; the phone sheet uses 10px top corners. Everything that marks a point (pins, badges, station dots, station icons) is a full circle. Borders are 1px and quiet.
+Gently rounded and plain. Controls, inputs and the cards inside the trip use a 5px radius; the floating panel cards and messages use 8px. Everything that marks a point (pins, badges, station dots, station icons) is a full circle. Borders are 1px and quiet.
 
 ## Components
 
@@ -256,7 +256,7 @@ Leaflet popups with the role eyebrow (pickup/return only), the address as title,
 
 ### Station Legend
 
-A wrapping inline list of 10px status dots with 12px muted labels, at the bottom of the panel, above the disclaimer.
+A wrapping inline list of 10px status dots with 12px muted labels, in the last panel card, above the disclaimer.
 
 ## Do's and Don'ts
 

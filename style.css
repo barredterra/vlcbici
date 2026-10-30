@@ -54,26 +54,41 @@ body {
   right: env(safe-area-inset-right);
 }
 
+/* The panel itself is transparent: the header and the three parts (route form,
+   trip, station legend) float on the map as separate cards, 10px apart. */
 #panel {
   position: absolute;
-  top: calc(10px + env(safe-area-inset-top));
-  left: calc(10px + env(safe-area-inset-left));
+  top: env(safe-area-inset-top);
+  left: env(safe-area-inset-left);
   z-index: 1000;
-  width: 360px;
-  max-height: calc(100% - 20px);
+  width: 380px; /* 360px cards plus 10px each side for their shadow */
+  max-height: calc(100% - env(safe-area-inset-top));
   display: flex;
   flex-direction: column;
-  background: #fff;
+}
+
+#panel-header,
+.card,
+#message {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+#panel-header,
+.card {
+  background: #fff;
 }
 
 #panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin: 10px 10px 0;
   padding: 10px 12px;
-  border-bottom: 1px solid #eee;
+}
+
+#panel.collapsed #panel-header {
+  margin-bottom: 10px;
 }
 
 #panel-header h1 {
@@ -85,9 +100,23 @@ body {
   color: var(--dest);
 }
 
+/* The padding leaves room for the card shadows inside the scroll area. */
 #panel-body {
-  padding: 10px 12px;
+  padding: 10px;
   overflow-y: auto;
+  scroll-padding-top: 10px;
+}
+
+#panel-body > * + * {
+  margin-top: 10px;
+}
+
+.card {
+  padding: 10px 12px;
+}
+
+.card > label:first-child {
+  margin-top: 0;
 }
 
 #panel.collapsed #panel-body {
@@ -213,23 +242,19 @@ button:disabled {
   color: var(--muted);
 }
 
-#message {
-  margin-top: 10px;
-}
-#message:empty {
+#message:empty,
+#summary:empty {
   display: none;
 }
 
 #message.error {
   padding: 8px;
-  border-radius: 5px;
   background: var(--error-tint);
   color: var(--error-ink);
 }
 
 #message.info {
   padding: 8px;
-  border-radius: 5px;
   background: #eef4ff;
   color: #1e3a8a;
 }
@@ -240,7 +265,7 @@ button:disabled {
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  margin: 12px 0 6px;
+  margin: 0 0 6px;
 }
 
 .trip-header h2 {
@@ -263,7 +288,7 @@ button:disabled {
   display: flex;
   flex-wrap: wrap;
   gap: 2px 12px;
-  margin: 12px 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
   color: var(--muted);
@@ -282,7 +307,7 @@ button:disabled {
 }
 
 .disclaimer {
-  margin: 12px 0 0;
+  margin: 8px 0 0;
   color: var(--muted);
   font-size: 12px;
 }
@@ -506,9 +531,8 @@ button:disabled {
     left: 0;
     width: 100%;
     max-height: 55%;
-    /* White continues below the home indicator; the content stays above it. */
+    /* The cards stay above the home indicator. */
     padding-bottom: env(safe-area-inset-bottom);
-    border-radius: 10px 10px 0 0;
   }
 
   /* The sheet sits at the bottom: down to hide, up to show. */

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-31T00:30:00Z",
+  "generatedAt": "2026-10-31T12:00:00Z",
   "title": "Design System: vlcbici",
   "extensions": {
     "colorMeta": {
@@ -52,7 +52,7 @@
       "stat": { "displayName": "Stat", "purpose": "Bike and dock counts in station popups." }
     },
     "shadows": [
-      { "name": "floating-panel", "value": "0 2px 10px rgba(0, 0, 0, 0.25)", "purpose": "The panel and bottom sheet floating over the map." },
+      { "name": "floating-card", "value": "0 2px 10px rgba(0, 0, 0, 0.25)", "purpose": "The panel header, the panel cards and messages floating over the map." },
       { "name": "map-legend", "value": "0 1px 4px rgba(0, 0, 0, 0.3)", "purpose": "Map legend control." },
       { "name": "map-pin", "value": "0 1px 4px rgba(0, 0, 0, 0.4)", "purpose": "A/B pins, station pins, live-location dot (with a 2px white border)." }
     ],
@@ -118,7 +118,7 @@
       "refersTo": "message-error",
       "description": "Error and info messages under the form.",
       "html": "<div class=\"ds-msg ds-msg-error\">The start is outside the Valenbisi area.</div><div class=\"ds-msg ds-msg-info\">The start station has only 2 bikes.</div>",
-      "css": ".ds-msg { margin-top: 8px; padding: 8px; border-radius: 5px; font: 15px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; } .ds-msg-error { background: #fde8e8; color: #9b1c1c; } .ds-msg-info { background: #eef4ff; color: #1e3a8a; }"
+      "css": ".ds-msg { margin-top: 8px; padding: 8px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25); font: 15px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; } .ds-msg-error { background: #fde8e8; color: #9b1c1c; } .ds-msg-info { background: #eef4ff; color: #1e3a8a; }"
     },
     {
       "name": "Station Legend",
@@ -130,20 +130,20 @@
   ],
   "narrative": {
     "northStar": "The Pocket Wayfinder",
-    "overview": "vlcbici is a calm guide in a stranger's pocket. The map leads; the panel quietly says what to do next. A visitor who does not know Valencia stands on a street with a phone in one hand and needs three answers fast: where to get a bike, where to ride, where to give it back. Every visual decision serves that glance.\n\nThe system is native map-app plain. It uses the platform's own font, flat white panels and controls that look like the ones people already know from map apps. The brand does not decorate; it lives in one place: the magenta course of the bike ride and the stations that start and end it. Slate carries the text and the main action. Status colours appear only where they report real station data.\n\nDensity is moderate and compact: a 360px floating panel on desktop, a bottom sheet on phones, small type steps, short gaps. Nothing in the panel competes with the map for attention.",
+    "overview": "vlcbici is a calm guide in a stranger's pocket. The map leads; the panel quietly says what to do next. A visitor who does not know Valencia stands on a street with a phone in one hand and needs three answers fast: where to get a bike, where to ride, where to give it back. Every visual decision serves that glance.\n\nThe system is native map-app plain. It uses the platform's own font, flat white panels and controls that look like the ones people already know from map apps. The brand does not decorate; it lives in one place: the magenta course of the bike ride and the stations that start and end it. Slate carries the text and the main action. Status colours appear only where they report real station data.\n\nDensity is moderate and compact: a column of 360px floating cards on desktop, the same cards stacked at the bottom on phones, small type steps, short gaps. Nothing in the cards competes with the map for attention.",
     "keyCharacteristics": [
-      "Map first; the panel is a quiet tool on top of it.",
+      "Map first; the panel is a quiet stack of cards on top of it.",
       "One brand colour, Route Magenta, reserved for the planned bike course and its stations.",
       "Slate ink for text and the primary action, never the brand colour.",
       "Colour always has a job: wayfinding (A/B), course, or station status.",
-      "System font, flat surfaces, one soft shadow for the floating panel."
+      "System font, flat surfaces, one soft shadow for everything that floats on the map."
     ],
     "rules": [
       { "name": "The One Course Rule", "body": "Route Magenta marks the planned bike course and the stations that bound it. It is not a button colour, a heading colour or a decoration. If something magenta is not part of the trip or a focus/selection state, it is wrong.", "section": "colors" },
       { "name": "The Data Owns Its Colours Rule", "body": "Green, orange, yellow, red and grey belong to station status, blue and cyan to bike lanes. New UI never reuses them for anything else.", "section": "colors" },
       { "name": "The Pin Equals Badge Rule", "body": "The A/B badges in the panel and popups always use the same colours as the A/B pins on the map. Change one, change both (`style.css` tokens and `app.js` pin colours).", "section": "colors" },
       { "name": "The Small Steps Rule", "body": "Sizes stay within 11–18px. Hierarchy comes from weight (400/600/700) and colour (ink vs. muted), not from big size jumps; the map is the only large element.", "section": "typography" },
-      { "name": "The Float Only Rule", "body": "A shadow means \"this sits on the map\". Nothing inside the panel gets one.", "section": "elevation" }
+      { "name": "The Float Only Rule", "body": "A shadow means \"this sits on the map\". Nothing inside a card gets one.", "section": "elevation" }
     ],
     "dos": [
       "Do keep Route Magenta (#c026d3) for the bike course, its stations, the \"B\" mark, the logo accent and focus.",

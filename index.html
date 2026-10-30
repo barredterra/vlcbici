@@ -37,7 +37,7 @@
       </header>
 
       <div id="panel-body">
-        <form id="route-form">
+        <form id="route-form" class="card">
           <label for="start-input"
             ><span class="ab-badge" aria-hidden="true">A</span>Start</label
           >
@@ -88,21 +88,23 @@
         </form>
 
         <div id="message" role="status"></div>
-        <div id="summary"></div>
+        <div id="summary" class="card"></div>
 
-        <!-- Same colours as stationColour() in app.js. -->
-        <ul class="station-legend" aria-label="Station colours">
-          <li style="--dot: #16a34a">Bikes and docks</li>
-          <li style="--dot: #ea580c">Few docks</li>
-          <li style="--dot: #eab308">Few bikes</li>
-          <li style="--dot: #dc2626">Few of both</li>
-          <li style="--dot: #9ca3af">Closed or no data</li>
-        </ul>
+        <div class="card">
+          <!-- Same colours as stationColour() in app.js. -->
+          <ul class="station-legend" aria-label="Station colours">
+            <li style="--dot: #16a34a">Bikes and docks</li>
+            <li style="--dot: #ea580c">Few docks</li>
+            <li style="--dot: #eab308">Few bikes</li>
+            <li style="--dot: #dc2626">Few of both</li>
+            <li style="--dot: #9ca3af">Closed or no data</li>
+          </ul>
 
-        <p class="disclaimer">
-          Unofficial app. Not affiliated with Valenbisi, JCDecaux or the City of
-          Valencia. Station data can be out of date.
-        </p>
+          <p class="disclaimer">
+            Unofficial app. Not affiliated with Valenbisi, JCDecaux or the City
+            of Valencia. Station data can be out of date.
+          </p>
+        </div>
       </div>
     </aside>
 
