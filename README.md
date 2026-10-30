@@ -22,13 +22,13 @@ The app ignores stations that are closed or that did not report data in the last
 
 The map shows all stations as small circles:
 
-| Colour | Meaning |
-| ------ | ------- |
-| Green  | 3+ bikes and 3+ free docks |
-| Orange | 3+ bikes, fewer than 3 free docks |
-| Yellow | 3+ free docks, fewer than 3 bikes |
+| Colour | Meaning                                        |
+| ------ | ---------------------------------------------- |
+| Green  | 3+ bikes and 3+ free docks                     |
+| Orange | 3+ bikes, fewer than 3 free docks              |
+| Yellow | 3+ free docks, fewer than 3 bikes              |
 | Red    | fewer than 3 bikes and fewer than 3 free docks |
-| Grey   | closed or no recent data |
+| Grey   | closed or no recent data                       |
 
 Map clicks fill the empty field: first the start, then the destination. When both fields are filled, the next click starts again.
 

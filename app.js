@@ -7,8 +7,10 @@ var STATIONS_URL =
 var BIKE_NETWORK_URL =
   "https://geoportal.valencia.es/server/rest/services/OPENDATA/Trafico/MapServer/189/query" +
   "?where=1=1&outFields=estado&outSR=4326&maxAllowableOffset=0.00001&f=geojson";
-var FOOT_ROUTER_URL = "https://routing.openstreetmap.de/routed-foot/route/v1/driving/";
-var BIKE_ROUTER_URL = "https://routing.openstreetmap.de/routed-bike/route/v1/driving/";
+var FOOT_ROUTER_URL =
+  "https://routing.openstreetmap.de/routed-foot/route/v1/driving/";
+var BIKE_ROUTER_URL =
+  "https://routing.openstreetmap.de/routed-bike/route/v1/driving/";
 var GEOCODER_URL =
   "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&viewbox=-0.45,39.53,-0.28,39.40&bounded=1&q=";
 
@@ -20,17 +22,39 @@ var MAX_SNAP_DISTANCE_M = 300; // farther from a road or path = point is not rou
 var GEOCODER_INTERVAL_MS = 1000; // Nominatim policy: max 1 request per second
 var VALENCIA_CENTER = [39.4699, -0.3763];
 
-var WALK_STYLE = { color: "#d62828", weight: 7, opacity: 0.9, dashArray: "1 12", lineCap: "round" };
+var WALK_STYLE = {
+  color: "#d62828",
+  weight: 7,
+  opacity: 0.9,
+  dashArray: "1 12",
+  lineCap: "round",
+};
 var BIKE_STYLE = { color: "#d62828", weight: 8, opacity: 0.9 };
 
 // Line styles for the "estado" codes of the city bike network, grouped for the legend.
 var BIKE_NETWORK_GROUPS = [
   // Bike lane, Turia park bike lane, bike path, network outside the city limits
-  { label: "Bike lane or path", codes: ["1", "4", "6", "8"], style: { color: "#1d4ed8", weight: 4 } },
+  {
+    label: "Bike lane or path",
+    codes: ["1", "4", "6", "8"],
+    style: { color: "#1d4ed8", weight: 4 },
+  },
   // Cycle street (30 km/h), bus-bike lane, low-traffic "ciclobarrio"
-  { label: "Shared with traffic", codes: ["2", "7", "9"], style: { color: "#0891b2", weight: 3 } },
-  { label: "Pedestrian street", codes: ["3"], style: { color: "#6b7280", weight: 3, dashArray: "4 6" } },
-  { label: "Closed for works", codes: ["5"], style: { color: "#f59e0b", weight: 4, dashArray: "6 6" } },
+  {
+    label: "Shared with traffic",
+    codes: ["2", "7", "9"],
+    style: { color: "#0891b2", weight: 3 },
+  },
+  {
+    label: "Pedestrian street",
+    codes: ["3"],
+    style: { color: "#6b7280", weight: 3, dashArray: "4 6" },
+  },
+  {
+    label: "Closed for works",
+    codes: ["5"],
+    style: { color: "#f59e0b", weight: 4, dashArray: "6 6" },
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -52,7 +76,9 @@ function haversineMeters(a, b) {
   var dLon = (b.lon - a.lon) * toRad;
   var sinLat = Math.sin(dLat / 2);
   var sinLon = Math.sin(dLon / 2);
-  var h = sinLat * sinLat + Math.cos(a.lat * toRad) * Math.cos(b.lat * toRad) * sinLon * sinLon;
+  var h =
+    sinLat * sinLat +
+    Math.cos(a.lat * toRad) * Math.cos(b.lat * toRad) * sinLon * sinLon;
   return 2 * earthRadius * Math.asin(Math.sqrt(h));
 }
 
@@ -109,7 +135,8 @@ function chooseDropoffStation(stations, destination, now) {
 // A bike only helps when walking to and from the stations is shorter than walking directly.
 function shouldWalkOnly(start, destination, pickup, dropoff) {
   if (pickup.id === dropoff.id) return true;
-  var stationWalks = haversineMeters(start, pickup) + haversineMeters(dropoff, destination);
+  var stationWalks =
+    haversineMeters(start, pickup) + haversineMeters(dropoff, destination);
   var directWalk = haversineMeters(start, destination);
   return stationWalks >= directWalk;
 }
@@ -151,7 +178,9 @@ function formatStep(step) {
     text = "Make a U-turn onto " + road;
   } else if (type === "new name" || type === "continue") {
     var keepSide = modifier && modifier !== "straight";
-    text = keepSide ? "Keep" + direction + " onto " + road : "Continue onto " + road;
+    text = keepSide
+      ? "Keep" + direction + " onto " + road
+      : "Continue onto " + road;
   } else if (modifier === "straight") {
     text = "Go straight onto " + road;
   } else if (type === "end of road") {
@@ -185,7 +214,9 @@ async function fetchStations() {
   try {
     geojson = await fetchJson(STATIONS_URL);
   } catch (err) {
-    throw new Error("Could not load Valenbisi station data (" + err.message + ").");
+    throw new Error(
+      "Could not load Valenbisi station data (" + err.message + ").",
+    );
   }
   // The ArcGIS server reports query errors as HTTP 200 with an "error" body.
   if (!geojson.features) {
@@ -206,13 +237,21 @@ async function geocode(text, label) {
   try {
     results = await fetchJson(GEOCODER_URL + encodeURIComponent(text));
   } catch (err) {
-    throw new Error("Geocoding of the " + label + " failed (" + err.message + ").");
+    throw new Error(
+      "Geocoding of the " + label + " failed (" + err.message + ").",
+    );
   }
   if (results.length === 0) {
-    throw new Error('No place found in Valencia for ' + label + ' "' + text + '".');
+    throw new Error(
+      "No place found in Valencia for " + label + ' "' + text + '".',
+    );
   }
   var place = results[0];
-  return { lat: Number(place.lat), lon: Number(place.lon), label: place.display_name };
+  return {
+    lat: Number(place.lat),
+    lon: Number(place.lon),
+    label: place.display_name,
+  };
 }
 
 // Returns { distance, duration, coordinates: [[lat, lon], ...], steps }.
@@ -225,13 +264,24 @@ async function fetchRoute(routerUrl, from, to, legName) {
     var response = await fetch(url);
     data = await response.json();
   } catch (err) {
-    throw new Error("Routing request failed for " + legName + " (" + err.message + ").");
+    throw new Error(
+      "Routing request failed for " + legName + " (" + err.message + ").",
+    );
   }
   if (data.code !== "Ok" || data.routes.length === 0) {
-    throw new Error("No route found for " + legName + " (" + (data.message || data.code) + ").");
+    throw new Error(
+      "No route found for " +
+        legName +
+        " (" +
+        (data.message || data.code) +
+        ").",
+    );
   }
   // OSRM snaps each point to the nearest road, even when that road is kilometres away.
-  var snapDistance = Math.max(data.waypoints[0].distance, data.waypoints[1].distance);
+  var snapDistance = Math.max(
+    data.waypoints[0].distance,
+    data.waypoints[1].distance,
+  );
   if (snapDistance > MAX_SNAP_DISTANCE_M) {
     throw new Error("No road or path found near the ends of " + legName + ".");
   }
@@ -261,7 +311,8 @@ var map = L.map("map").setView(VALENCIA_CENTER, 14);
 // Top right, so the panel (bottom sheet on phones) never covers the OSM credit.
 // Set it before adding layers: setPosition re-adds the control, which counts their credits twice.
 map.attributionControl.setPosition("topright");
-var OSM_CREDIT = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+var OSM_CREDIT =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 function osmStandardTiles() {
   return L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
@@ -272,14 +323,17 @@ function osmStandardTiles() {
 }
 var standardLayer = osmStandardTiles();
 // CyclOSM shows bike lanes, cycle tracks and bike parking.
-var cyclingLayer = L.tileLayer("https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png", {
-  maxZoom: 19,
-  referrerPolicy: "strict-origin-when-cross-origin",
-  attribution:
-    OSM_CREDIT +
-    ' | Map style: <a href="https://www.cyclosm.org/">CyclOSM</a>' +
-    ' hosted by <a href="https://openstreetmap.fr/">OpenStreetMap France</a>',
-});
+var cyclingLayer = L.tileLayer(
+  "https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
+  {
+    maxZoom: 19,
+    referrerPolicy: "strict-origin-when-cross-origin",
+    attribution:
+      OSM_CREDIT +
+      ' | Map style: <a href="https://www.cyclosm.org/">CyclOSM</a>' +
+      ' hosted by <a href="https://openstreetmap.fr/">OpenStreetMap France</a>',
+  },
+);
 
 // City bike network: standard tiles plus the city's lines, loaded on first use.
 // Its own pane keeps the lines below the route and station markers (overlayPane is 400).
@@ -297,8 +351,15 @@ bikeNetworkLegend.onAdd = function () {
   var box = L.DomUtil.create("div", "network-legend");
   var rows = BIKE_NETWORK_GROUPS.map(function (group) {
     var lineStyle = group.style.dashArray ? "dashed" : "solid";
-    var sample = group.style.weight + "px " + lineStyle + " " + group.style.color;
-    return '<div><span style="border-top:' + sample + '"></span>' + group.label + "</div>";
+    var sample =
+      group.style.weight + "px " + lineStyle + " " + group.style.color;
+    return (
+      '<div><span style="border-top:' +
+      sample +
+      '"></span>' +
+      group.label +
+      "</div>"
+    );
   });
   box.innerHTML = "<strong>City bike network</strong>" + rows.join("");
   return box;
@@ -312,7 +373,10 @@ cityLayer.on("add", async function () {
     bikeNetworkLines.addData(await fetchJson(BIKE_NETWORK_URL));
   } catch (err) {
     bikeNetworkLoaded = false; // try again the next time the layer is chosen
-    showMessage("Could not load the city bike network (" + err.message + ").", "error");
+    showMessage(
+      "Could not load the city bike network (" + err.message + ").",
+      "error",
+    );
   }
 });
 cityLayer.on("remove", function () {
@@ -321,12 +385,16 @@ cityLayer.on("remove", function () {
 
 standardLayer.addTo(map);
 L.control
-  .layers({ Standard: standardLayer, Cycling: cyclingLayer, "City bike network": cityLayer })
+  .layers({
+    Standard: standardLayer,
+    Cycling: cyclingLayer,
+    "City bike network": cityLayer,
+  })
   .addTo(map);
 // These credits apply to all map styles.
 map.attributionControl.addAttribution(
   'Stations and bike network: <a href="https://opendata.vlci.valencia.es/">Valencia Open Data</a>' +
-  ' | Routing: <a href="https://routing.openstreetmap.de/">FOSSGIS OSRM</a>'
+    ' | Routing: <a href="https://routing.openstreetmap.de/">FOSSGIS OSRM</a>',
 );
 
 var stationLayer = L.layerGroup().addTo(map);
@@ -368,11 +436,14 @@ function pinIcon(content, colour) {
   return L.divIcon({
     className: "",
     html:
-      '<div style="width:26px;height:26px;border-radius:50%;background:' + colour +
-      ';color:#fff;font:bold 13px system-ui,sans-serif;' +
+      '<div style="width:26px;height:26px;border-radius:50%;background:' +
+      colour +
+      ";color:#fff;font:bold 13px system-ui,sans-serif;" +
       // Flex centres both letters and icons inside the border (the page uses border-box).
-      'display:flex;align-items:center;justify-content:center;' +
-      'border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">' + content + "</div>",
+      "display:flex;align-items:center;justify-content:center;" +
+      'border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">' +
+      content +
+      "</div>",
     iconSize: [26, 26],
     iconAnchor: [13, 13],
     popupAnchor: [0, -13],
@@ -381,7 +452,8 @@ function pinIcon(content, colour) {
 
 function stationColour(station, now) {
   if (!isStationLive(station, now)) return "#9ca3af";
-  if (station.bikes >= MIN_BIKES && station.docks >= MIN_DOCKS) return "#16a34a";
+  if (station.bikes >= MIN_BIKES && station.docks >= MIN_DOCKS)
+    return "#16a34a";
   if (station.bikes >= MIN_BIKES) return "#ea580c"; // bikes but nearly full
   if (station.docks >= MIN_DOCKS) return "#eab308"; // docks but few bikes
   return "#dc2626";
@@ -389,9 +461,15 @@ function stationColour(station, now) {
 
 function stationPopup(station) {
   return (
-    "<strong>" + escapeHtml(station.name) + "</strong><br>" +
-    escapeHtml(station.address) + "<br>" +
-    "Bikes: " + station.bikes + " &middot; Free docks: " + station.docks
+    "<strong>" +
+    escapeHtml(station.name) +
+    "</strong><br>" +
+    escapeHtml(station.address) +
+    "<br>" +
+    "Bikes: " +
+    station.bikes +
+    " &middot; Free docks: " +
+    station.docks
   );
 }
 
@@ -416,7 +494,9 @@ function drawStations(stations) {
 function drawPoints() {
   pointLayer.clearLayers();
   if (startPoint) {
-    L.marker([startPoint.lat, startPoint.lon], { icon: pinIcon("A", "#111827") })
+    L.marker([startPoint.lat, startPoint.lon], {
+      icon: pinIcon("A", "#111827"),
+    })
       .bindPopup(escapeHtml(startPoint.label || "Start"))
       .addTo(pointLayer);
   }
@@ -468,7 +548,10 @@ function useMyLocation() {
   navigator.geolocation.getCurrentPosition(
     function (position) {
       clearMessage();
-      var point = { lat: position.coords.latitude, lon: position.coords.longitude };
+      var point = {
+        lat: position.coords.latitude,
+        lon: position.coords.longitude,
+      };
       setStart(point);
       map.setView([point.lat, point.lon], 15);
       showLiveLocation(position);
@@ -477,7 +560,7 @@ function useMyLocation() {
     function (err) {
       showMessage("Could not get your location: " + err.message, "error");
     },
-    { enableHighAccuracy: true, timeout: 10000 }
+    { enableHighAccuracy: true, timeout: 10000 },
   );
 }
 
@@ -497,7 +580,11 @@ function showLiveLocation(position) {
     iconSize: [18, 18],
   });
   // Above the A/B pins, below the station pins.
-  liveLocationMarker = L.marker(latLng, { icon: icon, interactive: false, zIndexOffset: 500 }).addTo(map);
+  liveLocationMarker = L.marker(latLng, {
+    icon: icon,
+    interactive: false,
+    zIndexOffset: 500,
+  }).addTo(map);
 }
 
 function watchLiveLocation() {
@@ -512,7 +599,7 @@ function watchLiveLocation() {
       if (liveLocationMarker) liveLocationMarker.remove();
       liveLocationMarker = null;
     },
-    { enableHighAccuracy: true, maximumAge: 10000 }
+    { enableHighAccuracy: true, maximumAge: 10000 },
   );
 }
 
@@ -527,15 +614,20 @@ function watchLiveLocationIfAllowed() {
 // Use the picked point, or geocode the typed text.
 async function resolvePoint(point, text, label) {
   if (point) return point;
-  if (!text.trim()) throw new Error("Please enter a " + label + " or click the map.");
+  if (!text.trim())
+    throw new Error("Please enter a " + label + " or click the map.");
   return geocode(text.trim(), label);
 }
 
 // The same icons as the station cards in the trip summary.
 function stationMarker(station, icon, title, detail) {
-  var popup = "<em>" + title + "</em><br>" + stationPopup(station) + "<br>" + detail;
+  var popup =
+    "<em>" + title + "</em><br>" + stationPopup(station) + "<br>" + detail;
   // Draw above the A/B pins: the pickup is often right next to the start.
-  var options = { icon: pinIcon('<span class="pin-icon">' + icon + "</span>", "#d62828"), zIndexOffset: 1000 };
+  var options = {
+    icon: pinIcon('<span class="pin-icon">' + icon + "</span>", "#d62828"),
+    zIndexOffset: 1000,
+  };
   return L.marker([station.lat, station.lon], options).bindPopup(popup);
 }
 
@@ -549,11 +641,20 @@ function legHtml(leg) {
     return "<li>" + escapeHtml(formatStep(step)) + "</li>";
   });
   return (
-    '<div class="leg ' + leg.mode + '">' +
-    '<div class="leg-title">' + escapeHtml(leg.title) + "</div>" +
-    '<div class="leg-meta">' + formatKm(leg.route.distance) + " &middot; " +
-    formatMinutes(leg.route.duration) + "</div>" +
-    "<details><summary>Directions</summary><ol>" + steps.join("") + "</ol></details>" +
+    '<div class="leg ' +
+    leg.mode +
+    '">' +
+    '<div class="leg-title">' +
+    escapeHtml(leg.title) +
+    "</div>" +
+    '<div class="leg-meta">' +
+    formatKm(leg.route.distance) +
+    " &middot; " +
+    formatMinutes(leg.route.duration) +
+    "</div>" +
+    "<details><summary>Directions</summary><ol>" +
+    steps.join("") +
+    "</ol></details>" +
     "</div>"
   );
 }
@@ -569,13 +670,23 @@ var PARKING_ICON =
 function stationCardHtml(icon, action, station, count) {
   return (
     '<div class="station-card">' +
-    '<div class="station-icon">' + icon + "</div>" +
-    '<div class="station-text">' +
-    '<div class="station-action">' + action + "</div>" +
-    '<div class="station-address">' + escapeHtml(station.address) + "</div>" +
-    '<div class="station-name">Station ' + station.id + "</div>" +
+    '<div class="station-icon">' +
+    icon +
     "</div>" +
-    '<div class="station-count">' + count + "</div>" +
+    '<div class="station-text">' +
+    '<div class="station-action">' +
+    action +
+    "</div>" +
+    '<div class="station-address">' +
+    escapeHtml(station.address) +
+    "</div>" +
+    '<div class="station-name">Station ' +
+    station.id +
+    "</div>" +
+    "</div>" +
+    '<div class="station-count">' +
+    count +
+    "</div>" +
     "</div>"
   );
 }
@@ -590,22 +701,38 @@ function renderSummary(legs, start, destination, pickup, dropoff) {
 
   var html = "<h2>Your trip</h2>";
   // Show what the geocoder found, so a wrong match is visible.
-  if (start.label) html += '<div class="place">From: ' + escapeHtml(start.label) + "</div>";
-  if (destination.label) html += '<div class="place">To: ' + escapeHtml(destination.label) + "</div>";
+  if (start.label)
+    html += '<div class="place">From: ' + escapeHtml(start.label) + "</div>";
+  if (destination.label)
+    html +=
+      '<div class="place">To: ' + escapeHtml(destination.label) + "</div>";
   if (pickup) {
     // Legs are walk, bike, walk: the station cards go between them.
     html +=
       legHtml(legs[0]) +
-      stationCardHtml(BIKE_ICON, "Pick up a bike", pickup, pickup.bikes + " bikes") +
+      stationCardHtml(
+        BIKE_ICON,
+        "Pick up a bike",
+        pickup,
+        pickup.bikes + " bikes",
+      ) +
       legHtml(legs[1]) +
-      stationCardHtml(PARKING_ICON, "Return the bike", dropoff, dropoff.docks + " free docks") +
+      stationCardHtml(
+        PARKING_ICON,
+        "Return the bike",
+        dropoff,
+        dropoff.docks + " free docks",
+      ) +
       legHtml(legs[2]);
   } else {
     html += legs.map(legHtml).join("");
   }
   html +=
-    '<div class="total">Total: ' + formatKm(totalDistance) + " &middot; " +
-    formatMinutes(totalDuration) + "</div>";
+    '<div class="total">Total: ' +
+    formatKm(totalDistance) +
+    " &middot; " +
+    formatMinutes(totalDuration) +
+    "</div>";
   summaryBox.innerHTML = html;
 }
 
@@ -634,34 +761,70 @@ async function planRoute(event) {
 
     var stations = await fetchStations();
     drawStations(stations);
-    if (!isNearNetwork(stations, start)) throw new Error("The start is outside the Valenbisi area.");
-    if (!isNearNetwork(stations, destination)) throw new Error("The destination is outside the Valenbisi area.");
+    if (!isNearNetwork(stations, start))
+      throw new Error("The start is outside the Valenbisi area.");
+    if (!isNearNetwork(stations, destination))
+      throw new Error("The destination is outside the Valenbisi area.");
 
     var now = Date.now();
     var pickup = choosePickupStation(stations, start, now);
     var dropoff = chooseDropoffStation(stations, destination, now);
-    if (!pickup) throw new Error("No open station with " + MIN_BIKES + "+ bikes available right now.");
-    if (!dropoff) throw new Error("No open station with " + MIN_DOCKS + "+ free docks right now.");
+    if (!pickup)
+      throw new Error(
+        "No open station with " + MIN_BIKES + "+ bikes available right now.",
+      );
+    if (!dropoff)
+      throw new Error(
+        "No open station with " + MIN_DOCKS + "+ free docks right now.",
+      );
 
     var legs;
     if (shouldWalkOnly(start, destination, pickup, dropoff)) {
-      var walkRoute = await fetchRoute(FOOT_ROUTER_URL, start, destination, "the walk");
+      var walkRoute = await fetchRoute(
+        FOOT_ROUTER_URL,
+        start,
+        destination,
+        "the walk",
+      );
       legs = [{ mode: "walk", title: "Walk to destination", route: walkRoute }];
-      showMessage("Walking directly is shorter than walking to and from the Valenbisi stations.", "info");
+      showMessage(
+        "Walking directly is shorter than walking to and from the Valenbisi stations.",
+        "info",
+      );
       renderSummary(legs, start, destination, null, null);
     } else {
       var routes = await Promise.all([
-        fetchRoute(FOOT_ROUTER_URL, start, pickup, "the walk to the pickup station"),
+        fetchRoute(
+          FOOT_ROUTER_URL,
+          start,
+          pickup,
+          "the walk to the pickup station",
+        ),
         fetchRoute(BIKE_ROUTER_URL, pickup, dropoff, "the bike ride"),
-        fetchRoute(FOOT_ROUTER_URL, dropoff, destination, "the walk to the destination"),
+        fetchRoute(
+          FOOT_ROUTER_URL,
+          dropoff,
+          destination,
+          "the walk to the destination",
+        ),
       ]);
       legs = [
         { mode: "walk", title: "Walk to the pickup station", route: routes[0] },
         { mode: "bike", title: "Ride to the return station", route: routes[1] },
         { mode: "walk", title: "Walk to destination", route: routes[2] },
       ];
-      stationMarker(pickup, BIKE_ICON, "Pickup station", pickup.bikes + " bikes available").addTo(routeLayer);
-      stationMarker(dropoff, PARKING_ICON, "Return station", dropoff.docks + " free docks").addTo(routeLayer);
+      stationMarker(
+        pickup,
+        BIKE_ICON,
+        "Pickup station",
+        pickup.bikes + " bikes available",
+      ).addTo(routeLayer);
+      stationMarker(
+        dropoff,
+        PARKING_ICON,
+        "Return station",
+        dropoff.docks + " free docks",
+      ).addTo(routeLayer);
       renderSummary(legs, start, destination, pickup, dropoff);
     }
 
@@ -693,7 +856,10 @@ function paddingOutsidePanel() {
     };
   }
   var panelRight = panel.offsetLeft + panel.offsetWidth;
-  return { paddingTopLeft: [panelRight + margin, margin], paddingBottomRight: [margin, margin] };
+  return {
+    paddingTopLeft: [panelRight + margin, margin],
+    paddingBottomRight: [margin, margin],
+  };
 }
 
 function clearAll() {
@@ -715,7 +881,9 @@ function togglePanel() {
 
 map.on("click", onMapClick);
 document.getElementById("route-form").addEventListener("submit", planRoute);
-document.getElementById("locate-button").addEventListener("click", useMyLocation);
+document
+  .getElementById("locate-button")
+  .addEventListener("click", useMyLocation);
 document.getElementById("clear-button").addEventListener("click", clearAll);
 toggleButton.addEventListener("click", togglePanel);
 startInput.addEventListener("input", function () {

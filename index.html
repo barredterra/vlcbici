@@ -1,48 +1,73 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Valenbisi Route Planner</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div id="map"></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Valenbisi Route Planner</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="map"></div>
 
-  <aside id="panel">
-    <header id="panel-header">
-      <h1>Valenbisi route</h1>
-      <button id="toggle-panel" type="button" aria-expanded="true">Hide</button>
-    </header>
+    <aside id="panel">
+      <header id="panel-header">
+        <h1>Valenbisi route</h1>
+        <button id="toggle-panel" type="button" aria-expanded="true">
+          Hide
+        </button>
+      </header>
 
-    <div id="panel-body">
-      <form id="route-form">
-        <label for="start-input">Start</label>
-        <div class="row">
-          <input id="start-input" type="text" placeholder="Address or click the map" autocomplete="off">
-          <button id="locate-button" type="button" title="Use my location">My location</button>
-        </div>
+      <div id="panel-body">
+        <form id="route-form">
+          <label for="start-input">Start</label>
+          <div class="row">
+            <input
+              id="start-input"
+              type="text"
+              placeholder="Address or click the map"
+              autocomplete="off"
+            />
+            <button id="locate-button" type="button" title="Use my location">
+              My location
+            </button>
+          </div>
 
-        <label for="dest-input">Destination</label>
-        <input id="dest-input" type="text" placeholder="Address or click the map" autocomplete="off">
+          <label for="dest-input">Destination</label>
+          <input
+            id="dest-input"
+            type="text"
+            placeholder="Address or click the map"
+            autocomplete="off"
+          />
 
-        <p class="hint">Map clicks fill the empty field: start first, then destination.</p>
+          <p class="hint">
+            Map clicks fill the empty field: start first, then destination.
+          </p>
 
-        <div class="row">
-          <button id="plan-button" type="submit">Plan route</button>
-          <button id="clear-button" type="button" class="secondary">Clear</button>
-        </div>
-      </form>
+          <div class="row">
+            <button id="plan-button" type="submit">Plan route</button>
+            <button id="clear-button" type="button" class="secondary">
+              Clear
+            </button>
+          </div>
+        </form>
 
-      <div id="message" role="status"></div>
-      <div id="summary"></div>
-    </div>
-  </aside>
+        <div id="message" role="status"></div>
+        <div id="summary"></div>
+      </div>
+    </aside>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script src="app.js"></script>
-</body>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="app.js"></script>
+  </body>
 </html>
