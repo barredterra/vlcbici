@@ -242,7 +242,7 @@ Gently rounded and plain. Controls, inputs, cards and messages use a 5px radius;
 
 - **Legs:** flat cards on a very light grey with a line swatch that copies the map line: a dotted Slate Ink line for walks, a solid Route Magenta line for the ride. Distance and time in 13px muted text; directions in a native `<details>`.
 - **Station cards:** white with a 1px light border; a 36px Route Magenta Tint circle with a magenta Lucide icon (bike or square-parking); the address in 600 weight and the count on the right.
-- **Total:** one bold line at the end.
+- **Total:** distance and time in 600 weight, on the same line as "Your trip", aligned right.
 
 ### Station Popups
 

@@ -109,7 +109,7 @@
       "name": "Leg Card",
       "kind": "card",
       "description": "One leg of the trip with a swatch that copies the map line.",
-      "html": "<div class=\"ds-leg\"><div class=\"ds-leg-title\"><span class=\"ds-swatch ds-swatch-bike\"></span>Ride to the return station</div><div class=\"ds-leg-meta\">4.46 km · 20 min</div></div><div class=\"ds-leg\"><div class=\"ds-leg-title\"><span class=\"ds-swatch\"></span>Walk to destination</div><div class=\"ds-leg-meta\">0.22 km · 3 min</div></div>",
+      "html": "<div class=\"ds-leg\"><div class=\"ds-leg-title\"><span class=\"ds-swatch ds-swatch-bike\"></span>Ride to the return station</div><div class=\"ds-leg-meta\">4.5 km · 20 min</div></div><div class=\"ds-leg\"><div class=\"ds-leg-title\"><span class=\"ds-swatch\"></span>Walk to destination</div><div class=\"ds-leg-meta\">220 m · 3 min</div></div>",
       "css": ".ds-leg { margin-top: 8px; padding: 6px 8px; background: #fafafa; border-radius: 5px; font: 15px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #0f172a; } .ds-leg-title { font-weight: 600; } .ds-swatch { display: inline-block; width: 18px; margin-right: 6px; vertical-align: middle; border-top: 4px dotted #0f172a; } .ds-swatch-bike { border-top-style: solid; border-top-color: #c026d3; } .ds-leg-meta { color: #64748b; font-size: 13px; }"
     },
     {

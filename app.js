@@ -154,12 +154,8 @@ function isNearNetwork(stations, point) {
 }
 
 function formatDistance(meters) {
-  if (meters < 1000) return Math.round(meters) + " m";
+  if (Math.round(meters) < 1000) return Math.round(meters) + " m";
   return (meters / 1000).toFixed(1) + " km";
-}
-
-function formatKm(meters) {
-  return (meters / 1000).toFixed(2) + " km";
 }
 
 function formatMinutes(seconds) {
@@ -758,7 +754,7 @@ function legHtml(leg) {
     escapeHtml(leg.title) +
     "</div>" +
     '<div class="leg-meta">' +
-    formatKm(leg.route.distance) +
+    formatDistance(leg.route.distance) +
     " &middot; " +
     formatMinutes(leg.route.duration) +
     "</div>" +
@@ -809,7 +805,12 @@ function renderSummary(legs, start, destination, pickup, dropoff) {
     totalDuration += leg.route.duration;
   });
 
-  let html = "<h2>Your trip</h2>";
+  let html =
+    '<div class="trip-header"><h2>Your trip</h2><span class="trip-total">' +
+    formatDistance(totalDistance) +
+    " &middot; " +
+    formatMinutes(totalDuration) +
+    "</span></div>";
   // Show what the geocoder found, so a wrong match is visible.
   if (start.label)
     html += '<div class="place">From: ' + escapeHtml(start.label) + "</div>";
@@ -837,12 +838,6 @@ function renderSummary(legs, start, destination, pickup, dropoff) {
         dropoff.docks + " free docks",
       );
   });
-  html +=
-    '<div class="total">Total: ' +
-    formatKm(totalDistance) +
-    " &middot; " +
-    formatMinutes(totalDuration) +
-    "</div>";
   summaryBox.innerHTML = html;
 }
 

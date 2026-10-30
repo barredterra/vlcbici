@@ -234,9 +234,23 @@ button:disabled {
   color: #1e3a8a;
 }
 
-#summary h2 {
+/* "Your trip" with the total distance and time on the same line. */
+.trip-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
   margin: 12px 0 6px;
+}
+
+.trip-header h2 {
+  margin: 0;
   font-size: 15px;
+}
+
+.trip-total {
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .place {
@@ -466,11 +480,6 @@ button:disabled {
   font-weight: 600;
   font-size: 13px;
   text-align: right;
-}
-
-.total {
-  margin-top: 8px;
-  font-weight: 600;
 }
 
 /* Legend for the "City bike network" map layer. */
