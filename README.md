@@ -2,6 +2,8 @@
 
 A small static web app that plans a trip in Valencia with walking and Valenbisi bike sharing.
 
+![A planned trip from Plaza del Ayuntamiento to the City of Arts and Sciences, with walking and bike legs on the map and the trip summary in the side panel](screenshot.png)
+
 > [!NOTE]
 > This is an unofficial project. It is not affiliated with, endorsed by or connected to Valenbisi, JCDecaux or the City of Valencia. "Valenbisi" is used only to name the bike sharing service that the app works with. Station data comes from the city's public open data and can be out of date. Check the station before you rely on it.
 
