@@ -15,8 +15,8 @@ var MAX_SNAP_DISTANCE_M = 300; // farther from a road or path = point is not rou
 var GEOCODER_INTERVAL_MS = 1000; // Nominatim policy: max 1 request per second
 var VALENCIA_CENTER = [39.4699, -0.3763];
 
-var WALK_STYLE = { color: "#2563eb", weight: 5, opacity: 0.85, dashArray: "2 10", lineCap: "round" };
-var BIKE_STYLE = { color: "#d62828", weight: 6, opacity: 0.9 };
+var WALK_STYLE = { color: "#d62828", weight: 7, opacity: 0.9, dashArray: "1 12", lineCap: "round" };
+var BIKE_STYLE = { color: "#d62828", weight: 8, opacity: 0.9 };
 
 // ---------------------------------------------------------------------------
 // Pure logic: no DOM, no network.
@@ -235,17 +235,32 @@ function wait(ms) {
 // ---------------------------------------------------------------------------
 
 var map = L.map("map").setView(VALENCIA_CENTER, 14);
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+// Top right, so the panel (bottom sheet on phones) never covers the OSM credit.
+// Set it before adding layers: setPosition re-adds the control, which counts their credits twice.
+map.attributionControl.setPosition("topright");
+var OSM_CREDIT = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+var standardLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   // OSM blocks tile requests without a Referer: https://wiki.openstreetmap.org/wiki/Blocked_tiles
   referrerPolicy: "strict-origin-when-cross-origin",
+  attribution: OSM_CREDIT,
+});
+// CyclOSM shows bike lanes, cycle tracks and bike parking.
+var cyclingLayer = L.tileLayer("https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png", {
+  maxZoom: 19,
+  referrerPolicy: "strict-origin-when-cross-origin",
   attribution:
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' +
-    ' | Stations: <a href="https://opendata.vlci.valencia.es/">Valencia Open Data</a>' +
-    ' | Routing: <a href="https://routing.openstreetmap.de/">FOSSGIS OSRM</a>',
-}).addTo(map);
-// Top right, so the panel (bottom sheet on phones) never covers the OSM credit.
-map.attributionControl.setPosition("topright");
+    OSM_CREDIT +
+    ' | Map style: <a href="https://www.cyclosm.org/">CyclOSM</a>' +
+    ' hosted by <a href="https://openstreetmap.fr/">OpenStreetMap France</a>',
+});
+standardLayer.addTo(map);
+L.control.layers({ Standard: standardLayer, Cycling: cyclingLayer }).addTo(map);
+// These credits apply to both map styles.
+map.attributionControl.addAttribution(
+  'Stations: <a href="https://opendata.vlci.valencia.es/">Valencia Open Data</a>' +
+  ' | Routing: <a href="https://routing.openstreetmap.de/">FOSSGIS OSRM</a>'
+);
 
 var stationLayer = L.layerGroup().addTo(map);
 var pointLayer = L.layerGroup().addTo(map);

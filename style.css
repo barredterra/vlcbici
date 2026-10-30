@@ -131,17 +131,17 @@ button:disabled { opacity: 0.6; cursor: wait; }
   border-radius: 5px;
 }
 
-/* Swatch that matches the line on the map: dotted blue walk, solid red bike. */
+/* Swatch that matches the line on the map: dotted red walk, solid red bike. */
 .leg-title::before {
   content: "";
   display: inline-block;
   width: 18px;
   margin-right: 6px;
   vertical-align: middle;
-  border-top: 3px dotted #2563eb;
+  border-top: 4px dotted #d62828;
 }
 
-.leg.bike .leg-title::before { border-top: 3px solid #d62828; }
+.leg.bike .leg-title::before { border-top: 4px solid #d62828; }
 
 .leg-title { font-weight: 600; }
 .leg-meta { color: #555; font-size: 13px; }

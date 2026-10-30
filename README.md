@@ -12,7 +12,7 @@ A small static web app that plans a trip in Valencia with walking and Valenbisi 
    - walk from the start to the pickup station,
    - ride from the pickup station to the return station,
    - walk from the return station to the destination.
-6. It shows the routes on the map (walking dashed, bike solid red), a summary with distance and time per leg, and turn-by-turn directions.
+6. It shows the routes on the map (walking as red dots, bike as a solid red line), a summary with distance and time per leg, and turn-by-turn directions.
 
 If the pickup and return stations are the same, or if walking to and from the stations is longer than walking directly, the app shows only a walking route.
 
@@ -36,6 +36,7 @@ Map clicks fill the empty field: first the start, then the destination. When bot
 
 - Station availability: [Valenbisi disponibilidad, Valencia Open Data](https://opendata.vlci.valencia.es/en/dataset/valenbisi-disponibilitat-valenbisi-dsiponibilidad), loaded live from the city geoportal (GeoJSON).
 - Map tiles: [OpenStreetMap](https://www.openstreetmap.org/copyright), © OpenStreetMap contributors.
+- Cycling map style (switch with the layer button at the top right): [CyclOSM](https://www.cyclosm.org/), hosted by OpenStreetMap France. It shows bike lanes, cycle tracks and bike parking.
 - Routing: [OSRM on OSM data by FOSSGIS](https://routing.openstreetmap.de/) (foot and bike profiles).
 - Geocoding: [Nominatim](https://nominatim.openstreetmap.org/). The app sends at most one search per second, only when you click "Plan route", and keeps each result until you change the text. It sends no search while you type.
 - Map library: [Leaflet 1.9.4](https://leafletjs.com/).
