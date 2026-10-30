@@ -57,7 +57,7 @@ body {
 #panel {
   position: absolute;
   top: calc(10px + env(safe-area-inset-top));
-  left: calc(54px + env(safe-area-inset-left));
+  left: calc(10px + env(safe-area-inset-left));
   z-index: 1000;
   width: 360px;
   max-height: calc(100% - 20px);
@@ -510,9 +510,14 @@ button:disabled {
     transform: rotate(180deg);
   }
 
-  /* The attribution sits top right (see app.js); keep it clear of the zoom buttons. */
+  /* Pinch to zoom instead. */
+  .leaflet-control-zoom {
+    display: none;
+  }
+
+  /* The attribution sits top right (see app.js) and wraps inside the screen. */
   .leaflet-control-attribution {
-    max-width: calc(100vw - 54px);
+    max-width: calc(100vw - 20px);
   }
 }
 

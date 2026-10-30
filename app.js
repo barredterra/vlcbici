@@ -330,6 +330,9 @@ const map = L.map("map").setView(VALENCIA_CENTER, 14);
 // Top right, so the panel (bottom sheet on phones) never covers the OSM credit.
 // Set it before adding layers: setPosition re-adds the control, which counts their credits twice.
 map.attributionControl.setPosition("topright");
+// Zoom buttons below the attribution, above the layer switcher: the panel has the left side.
+// Phones hide them (style.css) and use pinch zoom.
+map.zoomControl.setPosition("topright");
 const OSM_CREDIT =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 function osmStandardTiles() {
@@ -404,7 +407,7 @@ cityLayer.on("remove", function () {
 });
 
 standardLayer.addTo(map);
-L.control
+const layersControl = L.control
   .layers({
     "Street map": standardLayer,
     "Cycling map (OpenStreetMap)": cyclingLayer,
@@ -1000,25 +1003,27 @@ function setFormDisabled(disabled) {
   });
 }
 
-// Keep the route clear of the panel: left of it on desktop, above it on phones.
+// Keep the route clear of the panel (right of it on desktop, above it on phones)
+// and of the buttons on the right. The layer button is the wider one, and phones hide zoom.
 function paddingOutsidePanel() {
   const margin = 30;
+  const buttonsLeft = layersControl.getContainer().getBoundingClientRect().left;
+  const rightPadding = map.getSize().x - buttonsLeft + margin;
   const isPhone = window.matchMedia("(max-width: 600px)").matches;
   if (isPhone) {
-    // Attribution and layer switcher, stacked top right; taller than the zoom buttons.
-    const topControls = map
+    // On phones the attribution wraps to several lines across the top.
+    const attributionBottom = map.attributionControl
       .getContainer()
-      .querySelector(".leaflet-top.leaflet-right");
-    const topControlsBottom = topControls.getBoundingClientRect().bottom;
+      .getBoundingClientRect().bottom;
     return {
-      paddingTopLeft: [margin, topControlsBottom + margin],
-      paddingBottomRight: [margin, panel.offsetHeight + margin],
+      paddingTopLeft: [margin, attributionBottom + margin],
+      paddingBottomRight: [rightPadding, panel.offsetHeight + margin],
     };
   }
   const panelRight = panel.offsetLeft + panel.offsetWidth;
   return {
     paddingTopLeft: [panelRight + margin, margin],
-    paddingBottomRight: [margin, margin],
+    paddingBottomRight: [rightPadding, margin],
   };
 }
 
