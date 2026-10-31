@@ -44,6 +44,24 @@ A station popup has "Start" and "Destination" buttons. Use them when a station c
 
 The app keeps a station that you picked, even if it has fewer than 3 bikes or free docks, and shows a warning.
 
+Map clicks and the "Start" and "Destination" buttons work only while the form is open.
+
+## Start the journey
+
+After a plan, the form closes. The trip has two buttons:
+
+- "Start journey" starts the ride. The map follows your live location until you drag the map. "Follow me" turns this on again.
+- "Edit trip" opens the form again. The current trip stays on the map until you plan a new trip or click "Clear".
+
+During the journey, a station popup has "Pick up here" and "Return here" buttons. They plan the trip again with this station:
+
+- "Pick up here" makes this the pickup station. The trip then begins with a walk from your live location to the station, if the app knows your location.
+- "Return here" makes this the return station. The walk to your destination starts from the new station.
+
+During a bike trip, the app loads the station data again every minute. If the pickup station has fewer than 3 bikes, or the return station has fewer than 3 free docks, the app shows a message.
+
+"End journey" removes the trip and opens an empty form.
+
 ## Data sources
 
 - Station availability: [Valenbisi disponibilidad, Valencia Open Data](https://opendata.vlci.valencia.es/en/dataset/valenbisi-disponibilitat-valenbisi-dsiponibilidad), loaded live from the city geoportal (GeoJSON).

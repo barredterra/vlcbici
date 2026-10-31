@@ -430,12 +430,30 @@ const routeForm = document.getElementById("route-form");
 const planButton = document.getElementById("plan-button");
 const messageBox = document.getElementById("message");
 const summaryBox = document.getElementById("summary");
+const tripCard = document.getElementById("trip");
 const panel = document.getElementById("panel");
 const toggleButton = document.getElementById("toggle-panel");
 
 // Points picked on the map, by geolocation or already geocoded. A typed address clears them.
 let startPoint = null;
 let destPoint = null;
+
+// The last successful plan: { legs, start, destination, pickup, dropoff, pickupMarker,
+// dropoffMarker }. Walk-only trips have no stations and no station markers (null).
+let currentTrip = null;
+
+// While riding: the map follows the live location until the user drags it,
+// and the station counts refresh every minute.
+const STATION_REFRESH_MS = 60 * 1000;
+const STREET_ZOOM = 16;
+let followingLocation = false;
+let stationRefreshTimer = null;
+
+// "planning" (the form), "planned" (a plan, not started) or "riding".
+// style.css shows and hides the panel parts for each mode.
+function setMode(mode) {
+  document.body.dataset.mode = mode;
+}
 
 function escapeHtml(text) {
   return String(text)
@@ -531,13 +549,22 @@ function stationPopup(station, role) {
     status +
     "</div>" +
     // Handled in onStationButtonClick. They help when a station hides the spot to click.
-    '<div class="popup-actions">' +
+    '<div class="popup-actions plan-actions">' +
     '<button type="button" data-use-station="start" data-station-id="' +
     station.id +
     '"><span class="ab-badge" aria-hidden="true">A</span>Start</button>' +
     '<button type="button" data-use-station="destination" data-station-id="' +
     station.id +
     '"><span class="ab-badge dest" aria-hidden="true">B</span>Destination</button>' +
+    "</div>" +
+    // Handled in onRideStationClick. style.css shows one row per trip mode.
+    '<div class="popup-actions ride-actions">' +
+    '<button type="button" data-ride-station="pickup" data-station-id="' +
+    station.id +
+    '">Pick up here</button>' +
+    '<button type="button" data-ride-station="return" data-station-id="' +
+    station.id +
+    '">Return here</button>' +
     "</div>"
   );
 }
@@ -602,7 +629,8 @@ function setDestination(point) {
 // A station as start means "pick up the bike here", as destination "return it here".
 function onStationButtonClick(event) {
   const button = event.target.closest("[data-use-station]");
-  if (!button || planButton.disabled) return;
+  if (!button || document.body.dataset.mode !== "planning") return;
+  if (planButton.disabled) return;
   const station = findStation(shownStations, Number(button.dataset.stationId));
   const point = {
     lat: station.lat,
@@ -623,6 +651,7 @@ function onStationButtonClick(event) {
 }
 
 function onMapClick(event) {
+  if (document.body.dataset.mode !== "planning") return; // the form is hidden
   if (planButton.disabled) return; // a plan is running
   const point = { lat: event.latlng.lat, lon: event.latlng.lng };
   // Fill the empty field; when both are filled, start again.
@@ -669,6 +698,7 @@ let liveLocationWatchId = null;
 
 function showLiveLocation(position) {
   const latLng = [position.coords.latitude, position.coords.longitude];
+  if (followingLocation) panToLiveLocation(latLng, map.getZoom());
   if (liveLocationMarker) {
     liveLocationMarker.setLatLng(latLng);
     return;
@@ -686,6 +716,14 @@ function showLiveLocation(position) {
   }).addTo(map);
 }
 
+// Centre the dot in the part of the map that the panel leaves free, at this zoom.
+// A plain panTo would centre it on the whole map, which is behind the sheet on phones.
+function panToLiveLocation(latLng, zoom) {
+  const dot = L.latLngBounds([latLng, latLng]);
+  const options = Object.assign({ maxZoom: zoom }, paddingOutsidePanel());
+  map.fitBounds(dot, options);
+}
+
 function livePosition() {
   if (!liveLocationMarker) return null;
   const latLng = liveLocationMarker.getLatLng();
@@ -699,6 +737,11 @@ function watchLiveLocation() {
     function (err) {
       // Keep the last dot on short GPS gaps; remove it when the user revokes access.
       if (err.code !== err.PERMISSION_DENIED) return;
+      if (document.body.dataset.mode === "riding")
+        showMessage(
+          "Location access is off. The map cannot follow you.",
+          "info",
+        );
       navigator.geolocation.clearWatch(liveLocationWatchId);
       liveLocationWatchId = null;
       if (liveLocationMarker) liveLocationMarker.remove();
@@ -797,7 +840,12 @@ function stationCardHtml(icon, action, station, count) {
   );
 }
 
-function renderSummary(legs, start, destination, pickup, dropoff) {
+function renderSummary(trip) {
+  const legs = trip.legs;
+  const start = trip.start;
+  const destination = trip.destination;
+  const pickup = trip.pickup;
+  const dropoff = trip.dropoff;
   let totalDistance = 0;
   let totalDuration = 0;
   legs.forEach(function (leg) {
@@ -859,10 +907,76 @@ function drawLegs(legs) {
   });
 }
 
+// Walk to the pickup station (only with an origin), ride, then walk to the destination.
+// A destination station is where the bike goes back: no walk after it.
+function bikeLegs(origin, pickup, dropoff, destination) {
+  const plannedLegs = [];
+  if (origin) {
+    plannedLegs.push({
+      mode: "walk",
+      title: "Walk to the pickup station",
+      router: FOOT_ROUTER_URL,
+      from: origin,
+      to: pickup,
+      name: "the walk to the pickup station",
+    });
+  }
+  plannedLegs.push({
+    mode: "bike",
+    title: "Ride to the return station",
+    router: BIKE_ROUTER_URL,
+    from: pickup,
+    to: dropoff,
+    name: "the bike ride",
+  });
+  if (destination.stationId !== dropoff.id) {
+    plannedLegs.push({
+      mode: "walk",
+      title: "Walk to destination",
+      router: FOOT_ROUTER_URL,
+      from: dropoff,
+      to: destination,
+      name: "the walk to the destination",
+    });
+  }
+  return plannedLegs;
+}
+
+async function fetchLegs(plannedLegs) {
+  const routes = await Promise.all(
+    plannedLegs.map(function (leg) {
+      return fetchRoute(leg.router, leg.from, leg.to, leg.name);
+    }),
+  );
+  return plannedLegs.map(function (leg, i) {
+    return { mode: leg.mode, title: leg.title, route: routes[i] };
+  });
+}
+
+// Adds the pickup and return pins to the route layer and returns the trip.
+// The journey refreshes the counts in their popups.
+function bikeTrip(legs, origin, start, destination, pickup, dropoff) {
+  const pickupMarker = stationMarker(pickup, BIKE_ICON, "Pickup station");
+  const dropoffMarker = stationMarker(dropoff, PARKING_ICON, "Return station");
+  pickupMarker.addTo(routeLayer);
+  dropoffMarker.addTo(routeLayer);
+  return {
+    legs: legs,
+    origin: origin,
+    start: origin || start,
+    destination: destination,
+    pickup: pickup,
+    dropoff: dropoff,
+    pickupMarker: pickupMarker,
+    dropoffMarker: dropoffMarker,
+  };
+}
+
 async function planRoute(event) {
   event.preventDefault();
   clearMessage();
   summaryBox.innerHTML = "";
+  currentTrip = null;
   routeLayer.clearLayers();
   setFormDisabled(true); // no edits, clicks or Clear while a plan is running
   planButton.textContent = "Planning...";
@@ -933,56 +1047,29 @@ async function planRoute(event) {
       warnings.push(
         "Walking directly is shorter than walking to and from the Valenbisi stations.",
       );
-      renderSummary(legs, start, destination, null, null);
+      currentTrip = {
+        legs: legs,
+        origin: start,
+        start: start,
+        destination: destination,
+        pickup: null,
+        dropoff: null,
+        pickupMarker: null,
+        dropoffMarker: null,
+      };
     } else {
-      const plannedLegs = [];
-      if (origin) {
-        plannedLegs.push({
-          mode: "walk",
-          title: "Walk to the pickup station",
-          router: FOOT_ROUTER_URL,
-          from: origin,
-          to: pickup,
-          name: "the walk to the pickup station",
-        });
-      }
-      plannedLegs.push({
-        mode: "bike",
-        title: "Ride to the return station",
-        router: BIKE_ROUTER_URL,
-        from: pickup,
-        to: dropoff,
-        name: "the bike ride",
-      });
-      // A destination station is where the bike goes back: no walk after it.
-      if (!destination.stationId) {
-        plannedLegs.push({
-          mode: "walk",
-          title: "Walk to destination",
-          router: FOOT_ROUTER_URL,
-          from: dropoff,
-          to: destination,
-          name: "the walk to the destination",
-        });
-      }
-      const routes = await Promise.all(
-        plannedLegs.map(function (leg) {
-          return fetchRoute(leg.router, leg.from, leg.to, leg.name);
-        }),
-      );
-      legs = plannedLegs.map(function (leg, i) {
-        return { mode: leg.mode, title: leg.title, route: routes[i] };
-      });
-      stationMarker(pickup, BIKE_ICON, "Pickup station").addTo(routeLayer);
-      stationMarker(dropoff, PARKING_ICON, "Return station").addTo(routeLayer);
-      renderSummary(legs, origin || start, destination, pickup, dropoff);
+      legs = await fetchLegs(bikeLegs(origin, pickup, dropoff, destination));
+      currentTrip = bikeTrip(legs, origin, start, destination, pickup, dropoff);
     }
+    renderSummary(currentTrip);
     if (warnings.length) showMessage(warnings.join(" "), "info");
 
     drawLegs(legs);
+    // Before fitBounds: the form closes, so the phone sheet gets shorter.
+    setMode("planned");
     map.fitBounds(routeLayer.getBounds(), paddingOutsidePanel());
-    // In a short panel (phones, landscape) the plan is below the form: bring it into view.
-    const firstResult = messageBox.textContent ? messageBox : summaryBox;
+    // In a short panel (phones, landscape) the plan can be below the fold: bring it into view.
+    const firstResult = messageBox.textContent ? messageBox : tripCard;
     firstResult.scrollIntoView({ block: "start" });
   } catch (err) {
     showMessage(err.message, "error");
@@ -1023,6 +1110,9 @@ function paddingOutsidePanel() {
 }
 
 function clearAll() {
+  // Also ends a journey.
+  clearInterval(stationRefreshTimer);
+  followingLocation = false;
   startPoint = null;
   destPoint = null;
   startInput.value = "";
@@ -1030,7 +1120,175 @@ function clearAll() {
   pointLayer.clearLayers();
   routeLayer.clearLayers();
   summaryBox.innerHTML = "";
+  currentTrip = null;
   clearMessage();
+  setMode("planning");
+}
+
+function editTrip() {
+  setMode("planning");
+  // On phones the sheet is still scrolled down to the trip, below the form.
+  routeForm.scrollIntoView({ block: "start" });
+}
+
+function startJourney() {
+  setMode("riding");
+  // The user pressed a button, so a permission prompt is fine here.
+  if (navigator.geolocation) {
+    watchLiveLocation();
+    followLocation();
+  } else {
+    showMessage(
+      "Your browser does not support geolocation. The map cannot follow you.",
+      "info",
+    );
+  }
+  // Also for walk-only trips: a station popup can add a bike while riding.
+  stationRefreshTimer = setInterval(refreshTripStations, STATION_REFRESH_MS);
+}
+
+// Follow the live location (again, after a drag), at street level:
+// the route overview is too far out to ride by.
+function followLocation() {
+  followingLocation = true;
+  const zoom = Math.max(map.getZoom(), STREET_ZOOM);
+  const here = livePosition();
+  if (here) panToLiveLocation([here.lat, here.lon], zoom);
+  else map.setZoom(zoom); // the first position update pans to the dot
+}
+
+// Load the station counts again and warn when the pickup or return station runs low.
+async function refreshTripStations() {
+  const trip = currentTrip;
+  if (!trip.pickup) return; // walk only
+  let stations;
+  try {
+    stations = await fetchStations();
+  } catch (err) {
+    if (currentTrip === trip) showMessage(err.message, "error"); // keep the old plan
+    return;
+  }
+  // The journey can end, and a new one start, while the request runs.
+  if (currentTrip !== trip) return;
+
+  // A redraw closes an open station popup: keep the old dots until the next refresh.
+  const popupOpen = stationLayer.getLayers().some(function (marker) {
+    return marker.isPopupOpen();
+  });
+  if (!popupOpen) drawStations(stations);
+  // A station that left the feed keeps its old counts, which turn grey once they are too old.
+  trip.pickup = findStation(stations, trip.pickup.id) || trip.pickup;
+  trip.dropoff = findStation(stations, trip.dropoff.id) || trip.dropoff;
+  trip.pickupMarker.setPopupContent(
+    stationPopup(trip.pickup, "Pickup station"),
+  );
+  trip.dropoffMarker.setPopupContent(
+    stationPopup(trip.dropoff, "Return station"),
+  );
+
+  // The new summary closes the open "Directions": open them again.
+  const openDirections = Array.from(summaryBox.querySelectorAll("details")).map(
+    function (details) {
+      return details.open;
+    },
+  );
+  renderSummary(trip);
+  summaryBox.querySelectorAll("details").forEach(function (details, i) {
+    details.open = openDirections[i];
+  });
+  showTripWarnings(trip);
+}
+
+function showTripWarnings(trip) {
+  const now = Date.now();
+  const pickup = trip.pickup;
+  const dropoff = trip.dropoff;
+  const warnings = [];
+  if (!isStationLive(pickup, now))
+    warnings.push(
+      "The pickup station " + pickup.address + " is closed or not reporting.",
+    );
+  else if (pickup.bikes < MIN_BIKES)
+    warnings.push(
+      "The pickup station " +
+        pickup.address +
+        " now has only " +
+        pickup.bikes +
+        " bikes.",
+    );
+  if (!isStationLive(dropoff, now))
+    warnings.push(
+      "The return station " + dropoff.address + " is closed or not reporting.",
+    );
+  else if (dropoff.docks < MIN_DOCKS)
+    warnings.push(
+      "The return station " +
+        dropoff.address +
+        " now has only " +
+        dropoff.docks +
+        " free docks.",
+    );
+  if (warnings.length) showMessage(warnings.join(" "), "info");
+  else clearMessage();
+}
+
+// While riding, "Pick up here" and "Return here" in a station popup plan the trip again
+// with that station. A new pickup station gets a walk from the live location.
+async function onRideStationClick(event) {
+  const button = event.target.closest("[data-ride-station]");
+  if (!button || document.body.dataset.mode !== "riding") return;
+  map.closePopup();
+  const trip = currentTrip;
+  const station = findStation(shownStations, Number(button.dataset.stationId));
+
+  // A walk-only trip gets the stations that a normal plan would choose.
+  const now = Date.now();
+  let origin = trip.origin;
+  let pickup =
+    trip.pickup || choosePickupStation(shownStations, trip.start, now);
+  let dropoff =
+    trip.dropoff || chooseDropoffStation(shownStations, trip.destination, now);
+  if (button.dataset.rideStation === "pickup") {
+    pickup = station;
+    origin = livePosition() || trip.start;
+  } else {
+    dropoff = station;
+  }
+  if (!pickup || !dropoff) {
+    showMessage(
+      "No open station with enough bikes or docks right now.",
+      "error",
+    );
+    return;
+  }
+  if (pickup.id === dropoff.id) {
+    showMessage("Pickup and return must be different stations.", "error");
+    return;
+  }
+
+  showMessage("Planning the route with the new station...", "info");
+  let legs;
+  try {
+    legs = await fetchLegs(bikeLegs(origin, pickup, dropoff, trip.destination));
+  } catch (err) {
+    if (currentTrip === trip) showMessage(err.message, "error"); // keep the old plan
+    return;
+  }
+  // The journey can end, or another station pick replace the trip, while the routes load.
+  if (currentTrip !== trip) return;
+
+  routeLayer.clearLayers();
+  currentTrip = bikeTrip(
+    legs,
+    origin,
+    trip.start,
+    trip.destination,
+    pickup,
+    dropoff,
+  );
+  drawLegs(legs);
+  renderSummary(currentTrip);
+  showTripWarnings(currentTrip);
 }
 
 function togglePanel() {
@@ -1043,11 +1301,26 @@ function togglePanel() {
 
 map.on("click", onMapClick);
 document.addEventListener("click", onStationButtonClick);
+document.addEventListener("click", onRideStationClick);
 document.getElementById("route-form").addEventListener("submit", planRoute);
 document
   .getElementById("locate-button")
   .addEventListener("click", useMyLocation);
 document.getElementById("clear-button").addEventListener("click", clearAll);
+document
+  .getElementById("start-journey-button")
+  .addEventListener("click", startJourney);
+document.getElementById("edit-trip-button").addEventListener("click", editTrip);
+document
+  .getElementById("follow-button")
+  .addEventListener("click", followLocation);
+document
+  .getElementById("end-journey-button")
+  .addEventListener("click", clearAll);
+// Dragging the map means "let me look around": stop following for this journey.
+map.on("dragstart", function () {
+  followingLocation = false;
+});
 toggleButton.addEventListener("click", togglePanel);
 startInput.addEventListener("input", function () {
   startPoint = null;

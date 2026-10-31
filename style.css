@@ -243,8 +243,46 @@ button:disabled {
 }
 
 #message:empty,
-#summary:empty {
+#summary:empty,
+#trip:has(> #summary:empty) {
   display: none;
+}
+
+/* Trip modes: body data-mode is "planning", "planned" or "riding" (setMode in app.js).
+   The form and the Start/Destination popup buttons are only for planning, the
+   "Pick up here"/"Return here" popup buttons only for riding. While riding, only the
+   trip and the disclaimer stay, without the station legend. */
+body:not([data-mode="planning"]) #route-form,
+body:not([data-mode="planning"]) .plan-actions,
+body:not([data-mode="riding"]) .ride-actions,
+[data-mode="riding"] .station-legend {
+  display: none;
+}
+
+[data-mode="riding"] .disclaimer {
+  margin-top: 0;
+}
+
+#planned-actions,
+#riding-actions {
+  display: none;
+  margin-bottom: 8px;
+}
+
+[data-mode="planned"] #planned-actions,
+[data-mode="riding"] #riding-actions {
+  display: flex;
+}
+
+#start-journey-button {
+  flex: 1;
+}
+
+/* Bigger counts while riding: readable at a glance. Same size as the popup stats. */
+[data-mode="riding"] .station-count {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.1;
 }
 
 #message.error {

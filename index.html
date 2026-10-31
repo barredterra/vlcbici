@@ -15,7 +15,7 @@
     />
     <link rel="stylesheet" href="style.css" />
   </head>
-  <body>
+  <body data-mode="planning">
     <div id="map"></div>
 
     <aside id="panel">
@@ -88,7 +88,27 @@
         </form>
 
         <div id="message" role="status"></div>
-        <div id="summary" class="card"></div>
+        <div id="trip" class="card">
+          <!-- style.css shows one row per trip mode (body data-mode).
+               Above the trip, so that a long trip does not push them out of view. -->
+          <div id="planned-actions" class="row">
+            <button id="start-journey-button" type="button">
+              Start journey
+            </button>
+            <button id="edit-trip-button" type="button" class="secondary">
+              Edit trip
+            </button>
+          </div>
+          <div id="riding-actions" class="row">
+            <button id="follow-button" type="button" class="secondary">
+              Follow me
+            </button>
+            <button id="end-journey-button" type="button" class="secondary">
+              End journey
+            </button>
+          </div>
+          <div id="summary"></div>
+        </div>
 
         <div class="card">
           <!-- Same colours as stationColour() in app.js. -->
