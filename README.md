@@ -1,3 +1,5 @@
+<p align="center"><img src="logo.png" alt="vlcbici logo: the name, and a trip from A to B with a walk, a bike ride and a walk" width="208"></p>
+
 # vlcbici
 
 A small static web app that plans a trip in Valencia with walking and Valenbisi bike sharing.
