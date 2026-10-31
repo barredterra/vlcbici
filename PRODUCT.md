@@ -26,7 +26,7 @@ The full door-to-door plan in one step. The app picks the pickup and return stat
 
 ## Capabilities and Constraints
 
-- Static site with no build step and no backend: `index.html`, `style.css`, `app.js`, Leaflet 1.9.4 from a CDN.
+- Static site with no build step and no backend: `index.html`, `style.css`, native ES modules in `src/`, Leaflet 1.9.4 from a CDN.
 - Only public services: Valencia Open Data (station availability, city bike network), OpenStreetMap tiles, CyclOSM, FOSSGIS OSRM routing (foot and bike), Nominatim geocoding. Their usage policies apply (for example, at most one Nominatim request per second, no search while typing, `Referer` needed for OSM tiles).
 - Station rules: a station counts only when it is open and reported in the last 2 hours. Pickup needs 3+ bikes, return needs 3+ free docks. A station that the visitor picks is kept even below these counts, with a warning.
 - Walk-only result when the bike does not help. Points more than 2 km from every station are outside the service area.

@@ -2,7 +2,7 @@
   box-sizing: border-box;
 }
 
-/* Colour roles. The map colours (pins, lines, station dots) live in app.js and use the same values. */
+/* Colour roles. The map colours (pins, lines, station dots) live in src/ (config.js, map.js, points.js) and use the same values. */
 :root {
   --brand: #c026d3; /* brand magenta: logo, bike route, pickup and return stations, focus */
   --brand-tint: #fae8ff;
@@ -248,7 +248,7 @@ button:disabled {
   display: none;
 }
 
-/* Trip modes: body data-mode is "planning", "planned" or "riding" (setMode in app.js).
+/* Trip modes: body data-mode is "planning", "planned" or "riding" (setMode in src/panel.js).
    The form and the Start/Destination popup buttons are only for planning, the
    "Pick up here"/"Return here" popup buttons only for riding. While riding, only the
    trip and the disclaimer stay, without the station legend. */
@@ -586,7 +586,7 @@ body:not([data-mode="riding"]) .ride-actions,
     display: none;
   }
 
-  /* The attribution sits top right (see app.js) and wraps inside the screen. */
+  /* The attribution sits top right (see src/map.js) and wraps inside the screen. */
   .leaflet-control-attribution {
     max-width: calc(100vw - 20px);
   }

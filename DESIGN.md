@@ -166,7 +166,7 @@ A neutral slate instrument panel with a single magenta course line, and a fixed 
 
 **The Data Owns Its Colours Rule.** Green, orange, yellow, red and grey belong to station status, blue and cyan to bike lanes. New UI never reuses them for anything else.
 
-**The Pin Equals Badge Rule.** The A/B badges in the panel and popups always use the same colours as the A/B pins on the map. Change one, change both (`style.css` tokens and `app.js` pin colours).
+**The Pin Equals Badge Rule.** The A/B badges in the panel and popups always use the same colours as the A/B pins on the map. Change one, change both (`style.css` tokens and the pin colours in `src/points.js`).
 
 ## Typography
 

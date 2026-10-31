@@ -1,0 +1,186 @@
+// HTML for the station popups and the trip summary.
+
+import { MIN_BIKES, MIN_DOCKS } from "./config.js";
+import { isStationLive } from "./stations.js";
+import {
+  escapeHtml,
+  formatAge,
+  formatDistance,
+  formatMinutes,
+  formatStep,
+} from "./format.js";
+import { summaryBox } from "./panel.js";
+
+// Icons from Lucide (ISC licence): "bike" and "square-parking".
+export const BIKE_ICON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18.5" cy="17.5" r="3.5"/>' +
+  '<circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>';
+export const PARKING_ICON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/>' +
+  '<path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg>';
+
+// role: "Pickup station" or "Return station" on the route markers, empty otherwise.
+export function stationPopup(station, role) {
+  const now = Date.now();
+  const age = formatAge(now - station.updatedAt);
+  const live = isStationLive(station, now);
+  let status = "Updated " + age;
+  if (!station.open) status = "Closed";
+  else if (!live) status = "No recent data (last update " + age + ")";
+  // Counts of a closed or silent station are not reliable: grey them out.
+  const statsClass = live ? "popup-stats" : "popup-stats stale";
+
+  return (
+    (role ? '<div class="popup-role">' + role + "</div>" : "") +
+    '<div class="popup-title">' +
+    escapeHtml(station.address) +
+    "</div>" +
+    '<div class="popup-sub">Station ' +
+    station.id +
+    "</div>" +
+    '<div class="' +
+    statsClass +
+    '">' +
+    popupStatHtml(BIKE_ICON, station.bikes, "bikes", MIN_BIKES) +
+    popupStatHtml(PARKING_ICON, station.docks, "free docks", MIN_DOCKS) +
+    "</div>" +
+    '<div class="popup-status">' +
+    status +
+    "</div>" +
+    // Handled in onStationButtonClick. They help when a station hides the spot to click.
+    '<div class="popup-actions plan-actions">' +
+    '<button type="button" data-use-station="start" data-station-id="' +
+    station.id +
+    '"><span class="ab-badge" aria-hidden="true">A</span>Start</button>' +
+    '<button type="button" data-use-station="destination" data-station-id="' +
+    station.id +
+    '"><span class="ab-badge dest" aria-hidden="true">B</span>Destination</button>' +
+    "</div>" +
+    // Handled in onRideStationClick. style.css shows one row per trip mode.
+    '<div class="popup-actions ride-actions">' +
+    '<button type="button" data-ride-station="pickup" data-station-id="' +
+    station.id +
+    '">Pick up here</button>' +
+    '<button type="button" data-ride-station="return" data-station-id="' +
+    station.id +
+    '">Return here</button>' +
+    "</div>"
+  );
+}
+
+export function renderSummary(trip) {
+  const legs = trip.legs;
+  const start = trip.start;
+  const destination = trip.destination;
+  const pickup = trip.pickup;
+  const dropoff = trip.dropoff;
+  let totalDistance = 0;
+  let totalDuration = 0;
+  legs.forEach(function (leg) {
+    totalDistance += leg.route.distance;
+    totalDuration += leg.route.duration;
+  });
+
+  let html =
+    '<div class="trip-header"><h2>Your trip</h2><span class="trip-total">' +
+    formatDistance(totalDistance) +
+    " &middot; " +
+    formatMinutes(totalDuration) +
+    "</span></div>";
+  // Show what the geocoder found, so a wrong match is visible.
+  if (start.label)
+    html += '<div class="place">From: ' + escapeHtml(start.label) + "</div>";
+  if (destination.label)
+    html +=
+      '<div class="place">To: ' + escapeHtml(destination.label) + "</div>";
+  // The station cards frame the bike leg. A trip can lack the first or last walk.
+  legs.forEach(function (leg) {
+    if (leg.mode !== "bike") {
+      html += legHtml(leg);
+      return;
+    }
+    html +=
+      stationCardHtml(
+        BIKE_ICON,
+        "Pick up a bike",
+        pickup,
+        pickup.bikes + " bikes",
+      ) +
+      legHtml(leg) +
+      stationCardHtml(
+        PARKING_ICON,
+        "Return the bike",
+        dropoff,
+        dropoff.docks + " free docks",
+      );
+  });
+  summaryBox.innerHTML = html;
+}
+
+function popupStatHtml(icon, count, label, minimum) {
+  const low = count < minimum ? " low" : "";
+  return (
+    '<div class="popup-stat' +
+    low +
+    '">' +
+    icon +
+    "<div><strong>" +
+    count +
+    "</strong><span>" +
+    label +
+    "</span></div>" +
+    "</div>"
+  );
+}
+
+function legHtml(leg) {
+  // The roundabout step already names the exit road.
+  const shownSteps = leg.route.steps.filter(function (step) {
+    const type = step.maneuver.type;
+    return type !== "exit roundabout" && type !== "exit rotary";
+  });
+  const steps = shownSteps.map(function (step) {
+    return "<li>" + escapeHtml(formatStep(step)) + "</li>";
+  });
+  return (
+    '<div class="leg ' +
+    leg.mode +
+    '">' +
+    '<div class="leg-title">' +
+    escapeHtml(leg.title) +
+    "</div>" +
+    '<div class="leg-meta">' +
+    formatDistance(leg.route.distance) +
+    " &middot; " +
+    formatMinutes(leg.route.duration) +
+    "</div>" +
+    "<details><summary>Directions</summary><ol>" +
+    steps.join("") +
+    "</ol></details>" +
+    "</div>"
+  );
+}
+
+function stationCardHtml(icon, action, station, count) {
+  return (
+    '<div class="station-card">' +
+    '<div class="station-icon">' +
+    icon +
+    "</div>" +
+    '<div class="station-text">' +
+    '<div class="station-action">' +
+    action +
+    "</div>" +
+    '<div class="station-address">' +
+    escapeHtml(station.address) +
+    "</div>" +
+    '<div class="station-name">Station ' +
+    station.id +
+    "</div>" +
+    "</div>" +
+    '<div class="station-count">' +
+    count +
+    "</div>" +
+    "</div>"
+  );
+}

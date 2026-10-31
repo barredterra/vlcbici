@@ -141,7 +141,7 @@
     "rules": [
       { "name": "The One Course Rule", "body": "Route Magenta marks the planned bike course and the stations that bound it. It is not a button colour, a heading colour or a decoration. If something magenta is not part of the trip or a focus/selection state, it is wrong.", "section": "colors" },
       { "name": "The Data Owns Its Colours Rule", "body": "Green, orange, yellow, red and grey belong to station status, blue and cyan to bike lanes. New UI never reuses them for anything else.", "section": "colors" },
-      { "name": "The Pin Equals Badge Rule", "body": "The A/B badges in the panel and popups always use the same colours as the A/B pins on the map. Change one, change both (`style.css` tokens and `app.js` pin colours).", "section": "colors" },
+      { "name": "The Pin Equals Badge Rule", "body": "The A/B badges in the panel and popups always use the same colours as the A/B pins on the map. Change one, change both (`style.css` tokens and the pin colours in `src/points.js`).", "section": "colors" },
       { "name": "The Small Steps Rule", "body": "Sizes stay within 11–18px. Hierarchy comes from weight (400/600/700) and colour (ink vs. muted), not from big size jumps; the map is the only large element.", "section": "typography" },
       { "name": "The Float Only Rule", "body": "A shadow means \"this sits on the map\". Nothing inside a card gets one.", "section": "elevation" }
     ],

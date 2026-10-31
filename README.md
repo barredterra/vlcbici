@@ -76,7 +76,7 @@ During a bike trip, the app loads the station data again every minute. If the pi
 
 ## How to run
 
-The app has no build step and no backend. Serve the folder with any static web server:
+The app has no build step and no backend. The browser loads the JavaScript files in `src/` as native ES modules. Serve the folder with any static web server:
 
 ```sh
 python3 -m http.server 8000
@@ -84,15 +84,38 @@ python3 -m http.server 8000
 
 Then open <http://localhost:8000>.
 
-Do not open `index.html` directly from disk (`file://`). The browser then sends no `Referer` header, and the OpenStreetMap tile server blocks tile requests without it. Privacy extensions that strip the `Referer` cause the same problem. See <https://wiki.openstreetmap.org/wiki/Blocked_tiles>.
+Do not open `index.html` directly from disk (`file://`). Browsers do not load ES modules from disk, so the app does not start. Also, the browser then sends no `Referer` header, and the OpenStreetMap tile server blocks tile requests without it. Privacy extensions that strip the `Referer` cause the same problem. See <https://wiki.openstreetmap.org/wiki/Blocked_tiles>.
 
 "Use my location" needs `localhost` or HTTPS, because browsers allow geolocation only in a secure context.
 
-## Files
+## Run the tests
 
-- `index.html`: page layout.
+The unit tests cover the pure logic: station selection, the walk-only decision, the GeoJSON parser and the text formats. They use the Node.js test runner and need no packages. Node.js 18 or newer is necessary.
+
+```sh
+npm test
+```
+
+You can also run `node --test` directly.
+
+## Project structure
+
+- `index.html`: page layout. It loads Leaflet, then `src/main.js` as a module.
 - `style.css`: styles, including the mobile layout.
-- `app.js`: all logic. Pure functions (distance, station selection, step text) are at the top. Network calls and the map/UI code follow.
+- `src/main.js`: connects the page events to the modules and starts the app.
+- `src/config.js`: data URLs, limits and line styles.
+- `src/stations.js`: station data, distances and station selection. No DOM, no Leaflet.
+- `src/format.js`: text for distances, times, ages and directions. No DOM, no Leaflet.
+- `src/api.js`: network calls for stations, geocoding and routes.
+- `src/state.js`: the app state that more than one module uses.
+- `src/panel.js`: the panel elements, the status message and the trip mode.
+- `src/render.js`: HTML for the station popups and the trip summary.
+- `src/map.js`: the Leaflet map, the map styles, the city bike network and the map layers.
+- `src/points.js`: the start and destination points, from map clicks and station popups.
+- `src/location.js`: "Use my location" and the live location dot.
+- `src/trip.js`: trip planning and "Edit trip".
+- `src/journey.js`: the journey: follow the location, refresh the stations, change a station. Also "Clear" and "End journey".
+- `test/`: unit tests for `src/stations.js` and `src/format.js`.
 
 ## License
 

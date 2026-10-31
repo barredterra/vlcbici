@@ -1,0 +1,218 @@
+// The journey ("riding" mode): follow the live location, refresh the station counts,
+// and plan again with a station picked in a popup.
+
+import {
+  MIN_BIKES,
+  MIN_DOCKS,
+  STATION_REFRESH_MS,
+  STREET_ZOOM,
+} from "./config.js";
+import {
+  chooseDropoffStation,
+  choosePickupStation,
+  findStation,
+  isStationLive,
+} from "./stations.js";
+import { fetchStations } from "./api.js";
+import {
+  drawLegs,
+  drawStations,
+  map,
+  pointLayer,
+  routeLayer,
+  stationLayer,
+} from "./map.js";
+import {
+  livePosition,
+  panToLiveLocation,
+  watchLiveLocation,
+} from "./location.js";
+import { bikeLegs, bikeTrip, fetchLegs } from "./trip.js";
+import { renderSummary, stationPopup } from "./render.js";
+import {
+  clearMessage,
+  destInput,
+  setMode,
+  showMessage,
+  startInput,
+  summaryBox,
+} from "./panel.js";
+import { state } from "./state.js";
+
+let stationRefreshTimer = null;
+
+export function startJourney() {
+  setMode("riding");
+  // The user pressed a button, so a permission prompt is fine here.
+  if (navigator.geolocation) {
+    watchLiveLocation();
+    followLocation();
+  } else {
+    showMessage(
+      "Your browser does not support geolocation. The map cannot follow you.",
+      "info",
+    );
+  }
+  // Also for walk-only trips: a station popup can add a bike while riding.
+  stationRefreshTimer = setInterval(refreshTripStations, STATION_REFRESH_MS);
+}
+
+// "Clear" and "End journey": also ends a journey.
+export function clearAll() {
+  clearInterval(stationRefreshTimer);
+  state.followingLocation = false;
+  state.startPoint = null;
+  state.destPoint = null;
+  startInput.value = "";
+  destInput.value = "";
+  pointLayer.clearLayers();
+  routeLayer.clearLayers();
+  summaryBox.innerHTML = "";
+  state.currentTrip = null;
+  clearMessage();
+  setMode("planning");
+}
+
+// Follow the live location (again, after a drag), at street level:
+// the route overview is too far out to ride by.
+export function followLocation() {
+  state.followingLocation = true;
+  const zoom = Math.max(map.getZoom(), STREET_ZOOM);
+  const here = livePosition();
+  if (here) panToLiveLocation([here.lat, here.lon], zoom);
+  else map.setZoom(zoom); // the first position update pans to the dot
+}
+
+// While riding, "Pick up here" and "Return here" in a station popup plan the trip again
+// with that station. A new pickup station gets a walk from the live location.
+export async function onRideStationClick(event) {
+  const button = event.target.closest("[data-ride-station]");
+  if (!button || document.body.dataset.mode !== "riding") return;
+  map.closePopup();
+  const trip = state.currentTrip;
+  const stations = state.shownStations;
+  const station = findStation(stations, Number(button.dataset.stationId));
+
+  // A walk-only trip gets the stations that a normal plan would choose.
+  const now = Date.now();
+  let origin = trip.origin;
+  let pickup = trip.pickup || choosePickupStation(stations, trip.start, now);
+  let dropoff =
+    trip.dropoff || chooseDropoffStation(stations, trip.destination, now);
+  if (button.dataset.rideStation === "pickup") {
+    pickup = station;
+    origin = livePosition() || trip.start;
+  } else {
+    dropoff = station;
+  }
+  if (!pickup || !dropoff) {
+    showMessage(
+      "No open station with enough bikes or docks right now.",
+      "error",
+    );
+    return;
+  }
+  if (pickup.id === dropoff.id) {
+    showMessage("Pickup and return must be different stations.", "error");
+    return;
+  }
+
+  showMessage("Planning the route with the new station...", "info");
+  let legs;
+  try {
+    legs = await fetchLegs(bikeLegs(origin, pickup, dropoff, trip.destination));
+  } catch (err) {
+    if (state.currentTrip === trip) showMessage(err.message, "error"); // keep the old plan
+    return;
+  }
+  // The journey can end, or another station pick replace the trip, while the routes load.
+  if (state.currentTrip !== trip) return;
+
+  routeLayer.clearLayers();
+  state.currentTrip = bikeTrip(
+    legs,
+    origin,
+    trip.start,
+    trip.destination,
+    pickup,
+    dropoff,
+  );
+  drawLegs(legs);
+  renderSummary(state.currentTrip);
+  showTripWarnings(state.currentTrip);
+}
+
+// Load the station counts again and warn when the pickup or return station runs low.
+async function refreshTripStations() {
+  const trip = state.currentTrip;
+  if (!trip.pickup) return; // walk only
+  let stations;
+  try {
+    stations = await fetchStations();
+  } catch (err) {
+    if (state.currentTrip === trip) showMessage(err.message, "error"); // keep the old plan
+    return;
+  }
+  // The journey can end, and a new one start, while the request runs.
+  if (state.currentTrip !== trip) return;
+
+  // A redraw closes an open station popup: keep the old dots until the next refresh.
+  const popupOpen = stationLayer.getLayers().some(function (marker) {
+    return marker.isPopupOpen();
+  });
+  if (!popupOpen) drawStations(stations);
+  // A station that left the feed keeps its old counts, which turn grey once they are too old.
+  trip.pickup = findStation(stations, trip.pickup.id) || trip.pickup;
+  trip.dropoff = findStation(stations, trip.dropoff.id) || trip.dropoff;
+  trip.pickupMarker.setPopupContent(
+    stationPopup(trip.pickup, "Pickup station"),
+  );
+  trip.dropoffMarker.setPopupContent(
+    stationPopup(trip.dropoff, "Return station"),
+  );
+
+  // The new summary closes the open "Directions": open them again.
+  const openDirections = Array.from(summaryBox.querySelectorAll("details")).map(
+    function (details) {
+      return details.open;
+    },
+  );
+  renderSummary(trip);
+  summaryBox.querySelectorAll("details").forEach(function (details, i) {
+    details.open = openDirections[i];
+  });
+  showTripWarnings(trip);
+}
+
+function showTripWarnings(trip) {
+  const now = Date.now();
+  const pickup = trip.pickup;
+  const dropoff = trip.dropoff;
+  const warnings = [];
+  if (!isStationLive(pickup, now))
+    warnings.push(
+      "The pickup station " + pickup.address + " is closed or not reporting.",
+    );
+  else if (pickup.bikes < MIN_BIKES)
+    warnings.push(
+      "The pickup station " +
+        pickup.address +
+        " now has only " +
+        pickup.bikes +
+        " bikes.",
+    );
+  if (!isStationLive(dropoff, now))
+    warnings.push(
+      "The return station " + dropoff.address + " is closed or not reporting.",
+    );
+  else if (dropoff.docks < MIN_DOCKS)
+    warnings.push(
+      "The return station " +
+        dropoff.address +
+        " now has only " +
+        dropoff.docks +
+        " free docks.",
+    );
+  if (warnings.length) showMessage(warnings.join(" "), "info");
+  else clearMessage();
+}
