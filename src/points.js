@@ -4,7 +4,7 @@
 import { map, pinIcon, pointLayer } from "./map.js";
 import { destInput, planButton, startInput } from "./panel.js";
 import { findStation } from "./stations.js";
-import { escapeHtml } from "./format.js";
+import { escapeHtml, pointText } from "./format.js";
 import { state } from "./state.js";
 
 export function onMapClick(event) {
@@ -80,8 +80,4 @@ export function drawPoints() {
       .bindPopup(escapeHtml(state.destPoint.label || "Destination"))
       .addTo(pointLayer);
   }
-}
-
-function pointText(point) {
-  return point.lat.toFixed(5) + ", " + point.lon.toFixed(5);
 }

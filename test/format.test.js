@@ -6,6 +6,7 @@ import {
   formatDistance,
   formatMinutes,
   formatStep,
+  shortPlaceName,
 } from "../src/format.js";
 
 test("formatDistance uses metres below 1 km", function () {
@@ -70,4 +71,14 @@ test("escapeHtml escapes markup and quotes", function () {
     "&lt;a href=&quot;x&quot;&gt;&amp;&lt;/a&gt;",
   );
   assert.equal(escapeHtml(12), "12");
+});
+
+test("shortPlaceName keeps the first two parts", function () {
+  assert.equal(
+    shortPlaceName(
+      "23, Carrer de l'Escultor Josep Capuz, Montolivet, Valencia, 46005, Spain",
+    ),
+    "23, Carrer de l'Escultor Josep Capuz",
+  );
+  assert.equal(shortPlaceName("Your location"), "Your location");
 });

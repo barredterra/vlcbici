@@ -63,3 +63,12 @@ export function escapeHtml(text) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
+
+export function pointText(point) {
+  return point.lat.toFixed(5) + ", " + point.lon.toFixed(5);
+}
+
+// "Plaça de l'Ajuntament, Ciutat Vella, Valencia, …" -> "Plaça de l'Ajuntament, Ciutat Vella"
+export function shortPlaceName(label) {
+  return label.split(", ").slice(0, 2).join(", ");
+}

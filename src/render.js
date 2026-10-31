@@ -8,6 +8,8 @@ import {
   formatDistance,
   formatMinutes,
   formatStep,
+  pointText,
+  shortPlaceName,
 } from "./format.js";
 import { summaryBox } from "./panel.js";
 
@@ -87,12 +89,7 @@ export function renderSummary(trip) {
     " &middot; " +
     formatMinutes(totalDuration) +
     "</span></div>";
-  // Show what the geocoder found, so a wrong match is visible.
-  if (start.label)
-    html += '<div class="place">From: ' + escapeHtml(start.label) + "</div>";
-  if (destination.label)
-    html +=
-      '<div class="place">To: ' + escapeHtml(destination.label) + "</div>";
+  html += endpointHtml("A", "start", start);
   // The station cards frame the bike leg. A trip can lack the first or last walk.
   legs.forEach(function (leg) {
     if (leg.mode !== "bike") {
@@ -114,7 +111,29 @@ export function renderSummary(trip) {
         dropoff.docks + " free docks",
       );
   });
+  html += endpointHtml("B", "dest", destination);
   summaryBox.innerHTML = html;
+}
+
+// The A or B end of the timeline. It shows what the geocoder found, so a
+// wrong match is visible. A clicked point has no name: show its coordinates.
+// The full name is in the tooltip and in the popup of the pin on the map.
+function endpointHtml(letter, kind, point) {
+  const name = point.label || pointText(point);
+  return (
+    '<div class="endpoint ' +
+    kind +
+    '" title="' +
+    escapeHtml(name) +
+    '">' +
+    '<span class="ab-badge ' +
+    kind +
+    '" aria-hidden="true">' +
+    letter +
+    "</span>" +
+    escapeHtml(shortPlaceName(name)) +
+    "</div>"
+  );
 }
 
 function popupStatHtml(icon, count, label, minimum) {

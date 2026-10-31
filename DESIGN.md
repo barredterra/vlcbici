@@ -240,7 +240,7 @@ Gently rounded and plain. Controls, inputs and the cards inside the trip use a 5
 
 ### Trip Summary
 
-- **Legs:** flat cards on a very light grey with a line swatch that copies the map line: a dotted Slate Ink line for walks, a solid Route Magenta line for the ride. Distance and time in 13px muted text; directions in a native `<details>`.
+- **Legs:** a timeline. Each leg has a vertical line that copies the map line (a dotted Slate Ink line for walks, a solid Route Magenta line for the ride) and runs through the centre of the station icons. The leg text lines up with the station card text. The A and B badges on the line start and end the timeline, with the name of the start and the destination (or the coordinates of a clicked point). The name shows only its first two parts, such as "Plaça de l'Ajuntament, Ciutat Vella"; the tooltip has the full name. Distance and time in 13px muted text; directions in a native `<details>`.
 - **Station cards:** white with a 1px light border; a 36px Route Magenta Tint circle with a magenta Lucide icon (bike or square-parking); the address in 600 weight and the count on the right.
 - **Total:** distance and time in 600 weight, on the same line as "Your trip", aligned right.
 

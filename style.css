@@ -316,11 +316,6 @@ body:not([data-mode="riding"]) .ride-actions,
   white-space: nowrap;
 }
 
-.place {
-  color: #555;
-  font-size: 13px;
-}
-
 /* Key for the station dots on the map. */
 .station-legend {
   display: flex;
@@ -350,25 +345,63 @@ body:not([data-mode="riding"]) .ride-actions,
   font-size: 12px;
 }
 
+/* The legs and station cards read as a timeline. Each leg has a vertical
+   line that matches the line on the map (dotted dark walk, solid magenta
+   bike). The line runs through the centre of the station icons: card border
+   1px + padding 8px + half the 36px icon = 27px. The leg text lines up with
+   the station text: 1px + 8px + 36px + 10px gap = 55px. */
 .leg {
-  margin-top: 8px;
-  padding: 6px 8px;
-  background: #fafafa;
-  border-radius: 5px;
+  position: relative;
+  padding: 8px 8px 8px 55px;
 }
 
-/* Swatch that matches the line on the map: dotted dark walk, solid magenta bike. */
-.leg-title::before {
+.leg::before {
   content: "";
-  display: inline-block;
-  width: 18px;
-  margin-right: 6px;
-  vertical-align: middle;
-  border-top: 4px dotted var(--ink);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 25px;
+  border-left: 4px dotted var(--ink);
 }
 
-.leg.bike .leg-title::before {
-  border-top: 4px solid var(--brand);
+.leg.bike::before {
+  border-left-style: solid;
+  border-left-color: var(--brand);
+}
+
+/* The A and B ends of the timeline, with the name of the start and the
+   destination. The 18px badge is centred on the line: 27px - 9px = 18px.
+   A short dotted line joins the badge to a walk leg. */
+.endpoint {
+  position: relative;
+  padding: 8px 8px 8px 55px;
+  color: #555;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.endpoint .ab-badge {
+  position: absolute;
+  top: 8px;
+  left: 18px;
+}
+
+.endpoint.start:has(+ .leg)::before,
+.leg + .endpoint.dest::before {
+  content: "";
+  position: absolute;
+  left: 25px;
+  border-left: 4px dotted var(--ink);
+}
+
+.endpoint.start::before {
+  top: 17px;
+  bottom: 0;
+}
+
+.endpoint.dest::before {
+  top: 0;
+  height: 17px;
 }
 
 .leg-title {
@@ -392,7 +425,6 @@ body:not([data-mode="riding"]) .ride-actions,
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 8px;
   padding: 8px;
   border: 1px solid #e5e5e5;
   border-radius: 5px;
