@@ -63,18 +63,10 @@ bikeNetworkLegend.onAdd = function () {
   const box = L.DomUtil.create("div", "network-legend");
   const rows = BIKE_NETWORK_GROUPS.map(function (group) {
     const lineStyle = group.style.dashArray ? "dashed" : "solid";
-    const sample =
-      group.style.weight + "px " + lineStyle + " " + group.style.color;
-    return (
-      '<div><span style="border-top:' +
-      sample +
-      '"></span>' +
-      group.label +
-      "</div>"
-    );
+    const sample = `${group.style.weight}px ${lineStyle} ${group.style.color}`;
+    return `<div><span style="border-top:${sample}"></span>${group.label}</div>`;
   });
-  box.innerHTML =
-    "<strong>Bike network (City of Valencia)</strong>" + rows.join("");
+  box.innerHTML = `<strong>Bike network (City of Valencia)</strong>${rows.join("")}`;
   return box;
 };
 let bikeNetworkLoaded = false;
@@ -146,7 +138,7 @@ export function drawStations(stations) {
 export function stationMarker(station, icon, role) {
   // Draw above the A/B pins: the pickup is often right next to the start.
   const options = {
-    icon: pinIcon('<span class="pin-icon">' + icon + "</span>", "#c026d3"),
+    icon: pinIcon(`<span class="pin-icon">${icon}</span>`, "#c026d3"),
     zIndexOffset: 1000,
   };
   return L.marker([station.lat, station.lon], options).bindPopup(
@@ -198,17 +190,15 @@ export function paddingOutsidePanel() {
 }
 
 export function pinIcon(content, colour) {
+  const style =
+    `width:30px;height:30px;border-radius:50%;background:${colour};` +
+    "color:#fff;font:bold 14px system-ui,sans-serif;" +
+    // Flex centres both letters and icons inside the border (the page uses border-box).
+    "display:flex;align-items:center;justify-content:center;" +
+    "border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)";
   return L.divIcon({
     className: "",
-    html:
-      '<div style="width:30px;height:30px;border-radius:50%;background:' +
-      colour +
-      ";color:#fff;font:bold 14px system-ui,sans-serif;" +
-      // Flex centres both letters and icons inside the border (the page uses border-box).
-      "display:flex;align-items:center;justify-content:center;" +
-      'border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">' +
-      content +
-      "</div>",
+    html: `<div style="${style}">${content}</div>`,
     iconSize: [30, 30],
     iconAnchor: [15, 15],
     popupAnchor: [0, -15],
