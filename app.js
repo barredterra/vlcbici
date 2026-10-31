@@ -672,7 +672,20 @@ function useMyLocation() {
     showMessage("Your browser does not support geolocation.", "error");
     return;
   }
+  // The live dot already knows where the user is. No need to wait for a new fix.
+  const here = livePosition();
+  if (here) {
+    setStart({ lat: here.lat, lon: here.lon });
+    map.setView([here.lat, here.lon], 15);
+    return;
+  }
   showMessage("Looking up your location...", "info");
+  requestLocation(true);
+}
+
+// A precise GPS fix can take long indoors or on laptops.
+// When it times out, try once more with the faster network-based location.
+function requestLocation(highAccuracy) {
   navigator.geolocation.getCurrentPosition(
     function (position) {
       clearMessage();
@@ -686,9 +699,13 @@ function useMyLocation() {
       watchLiveLocation();
     },
     function (err) {
+      if (err.code === err.TIMEOUT && highAccuracy) {
+        requestLocation(false);
+        return;
+      }
       showMessage("Could not get your location: " + err.message, "error");
     },
-    { enableHighAccuracy: true, timeout: 10000 },
+    { enableHighAccuracy: highAccuracy, timeout: 10000, maximumAge: 60000 },
   );
 }
 
