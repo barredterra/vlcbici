@@ -115,6 +115,7 @@ const STATION_POPUP_OPTIONS = { className: "station-popup", minWidth: 220 };
 
 export function drawStations(stations) {
   const now = Date.now();
+  state.stationsDrawnAt = now;
   state.shownStations = stations;
   stationLayer.clearLayers();
   stations.forEach(function (station) {

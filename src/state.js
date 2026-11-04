@@ -11,6 +11,8 @@ export const state = {
 
   // The stations on the map, for the buttons in their popups.
   shownStations: [],
+  // When drawStations() last drew station data (ms). main.js loads it again when the app comes back.
+  stationsDrawnAt: 0,
 
   // While riding: the map follows the live location until the user drags it.
   followingLocation: false,

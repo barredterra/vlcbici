@@ -2,6 +2,7 @@
 // This file connects the page events to the modules and starts the app.
 
 import { fetchStations } from "./api.js";
+import { STATION_REFRESH_MS } from "./config.js";
 import { drawStations, map } from "./map.js";
 import { onMapClick, onStationButtonClick } from "./points.js";
 import { useMyLocation, watchLiveLocationIfAllowed } from "./location.js";
@@ -13,7 +14,9 @@ import {
   startJourney,
 } from "./journey.js";
 import {
+  clearMessage,
   destInput,
+  messageBox,
   showMessage,
   startInput,
   toggleButton,
@@ -52,10 +55,34 @@ destInput.addEventListener("input", function () {
 });
 
 // Show the station map right away; planning fetches fresh data again.
-fetchStations()
-  .then(drawStations)
-  .catch(function (err) {
-    showMessage(err.message, "error");
-  });
+// When a later load works, remove the old load error, but keep other messages.
+let stationLoadError = "";
+function loadStations() {
+  fetchStations()
+    .then(function (stations) {
+      drawStations(stations);
+      if (stationLoadError && messageBox.textContent === stationLoadError) {
+        clearMessage();
+      }
+      stationLoadError = "";
+    })
+    .catch(function (err) {
+      stationLoadError = err.message;
+      showMessage(err.message, "error");
+    });
+}
+loadStations();
+
+// An installed app has no reload button and can stay in the background for hours.
+// Load the station counts again when it comes back. While riding, journey.js does this.
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState !== "visible") return;
+  if (document.body.dataset.mode === "riding") return;
+  if (Date.now() - state.stationsDrawnAt < STATION_REFRESH_MS) return;
+  loadStations();
+});
 
 watchLiveLocationIfAllowed();
+
+// Installable app; without a connection it only opens (see sw.js).
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");

@@ -150,7 +150,7 @@ A neutral slate instrument panel with a single magenta course line, and a fixed 
 - **Slate Muted** (#64748b): helper text, the station legend and the disclaimer.
 - **Slate Border** (#cbd5e1): input borders.
 - **Slate Soft** (#f1f5f9): secondary button fill ("Clear" and the icon buttons).
-- **Panel White** (#ffffff): the panel cards, inputs, station cards and map legends.
+- **Panel White** (#ffffff): the panel cards, inputs, station cards and map legends; also the theme and splash colour of the installed app (not Route Magenta: see The One Course Rule).
 
 ### Status (map data, fixed)
 
@@ -253,6 +253,10 @@ Leaflet popups with the role eyebrow (pickup/return only), the address as title,
 - **Route:** bike leg solid Route Magenta, 8px, 0.9 opacity; walk legs Slate Ink, 7px, round dots (`1 12` dash). Each line sits on a white outline 4px wider (same dash pattern), so it stays readable on CyclOSM and the city network layer.
 - **Pins:** 30px circles with a 2px white border; A/B letters or station icons in white.
 - **Station dots:** 7px radius circles with a 2px white border in the status colours, drawn below the route.
+
+### App Icon
+
+The route mark of the logo: Slate Ink "A" circle, dotted walk, Route Magenta bike bar, dotted walk, Route Magenta "B" circle. It runs diagonally from bottom left to top right on full-bleed Panel White. The mark stays inside the central 80% circle, so one image is also the maskable icon. The source is `icons/icon.svg`.
 
 ### Station Legend
 

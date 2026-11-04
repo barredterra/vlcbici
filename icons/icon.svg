@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- App icon: the route mark of logo.png (A, walk, bike, walk, B) on Panel White.
+       Everything stays inside the central 80% circle (radius 205), so it is also the maskable icon. -->
+  <rect width="512" height="512" fill="#ffffff"/>
+  <g transform="rotate(-45 256 256)">
+    <g fill="#0f172a">
+      <circle cx="176" cy="256" r="10"/>
+      <circle cx="200" cy="256" r="10"/>
+      <circle cx="312" cy="256" r="10"/>
+      <circle cx="336" cy="256" r="10"/>
+    </g>
+    <line x1="230" y1="256" x2="282" y2="256" stroke="#c026d3" stroke-width="28" stroke-linecap="round"/>
+    <circle cx="110" cy="256" r="52" fill="#0f172a"/>
+    <circle cx="402" cy="256" r="52" fill="#c026d3"/>
+  </g>
+  <!-- The letters are paths, so every SVG renderer draws them the same. -->
+  <g fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M134 384 L153 334 L172 384 M141 368 H165"/>
+    <path d="M348 178 V128 H360 a12.5 12.5 0 0 1 0 25 H348 M360 153 H362 a12.5 12.5 0 0 1 0 25 H348"/>
+  </g>
+</svg>

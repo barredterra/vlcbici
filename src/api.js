@@ -9,7 +9,12 @@ import {
 import { parseStations } from "./stations.js";
 
 export async function fetchJson(url) {
-  const response = await fetch(url);
+  let response;
+  try {
+    response = await fetch(url);
+  } catch (err) {
+    throw new Error(networkReason(err));
+  }
   if (!response.ok) {
     throw new Error("HTTP " + response.status + " from " + new URL(url).host);
   }
@@ -75,7 +80,11 @@ export async function fetchRoute(routerUrl, from, to, legName) {
     data = await response.json();
   } catch (err) {
     throw new Error(
-      "Routing request failed for " + legName + " (" + err.message + ").",
+      "Routing request failed for " +
+        legName +
+        " (" +
+        networkReason(err) +
+        ").",
     );
   }
   if (data.code !== "Ok" || data.routes.length === 0) {
@@ -105,6 +114,12 @@ export async function fetchRoute(routerUrl, from, to, legName) {
     coordinates: latLngs,
     steps: route.legs[0].steps,
   };
+}
+
+// Each browser has its own text for a failed fetch ("Failed to fetch", "Load failed").
+// Without a connection, say so plainly.
+function networkReason(err) {
+  return navigator.onLine ? err.message : "no internet connection";
 }
 
 function wait(ms) {

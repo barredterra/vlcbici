@@ -64,6 +64,19 @@ During a bike trip, the app loads the station data again every minute. If the pi
 
 "End journey" removes the trip and opens an empty form.
 
+## Install as an app
+
+You can install vlcbici on your phone or computer:
+
+- In Chrome or Edge, use the install icon in the address bar, or the menu item "Install app" or "Add to Home screen".
+- In Safari on iPhone or iPad, use Share > "Add to Home Screen".
+
+Without a connection, the app opens and shows "no internet connection".
+
+The app does not keep station data, routes, addresses, the city bike network or map tiles. These always come live from the services, so the app never shows old data as current.
+
+When the app comes back after a minute or more in the background, it loads the station data again.
+
 ## Data sources
 
 - Station availability: [Valenbisi disponibilidad, Valencia Open Data](https://opendata.vlci.valencia.es/en/dataset/valenbisi-disponibilitat-valenbisi-dsiponibilidad), loaded live from the city geoportal (GeoJSON).
@@ -88,9 +101,11 @@ Do not open `index.html` directly from disk (`file://`). Browsers do not load ES
 
 "Use my location" needs `localhost` or HTTPS, because browsers allow geolocation only in a secure context.
 
+The service worker (`sw.js`) also works only on `localhost` or HTTPS. It loads the app files from the network first, so code changes show on a normal reload. To test offline, use DevTools > Application > Service workers > Offline. If you serve other projects on the same `localhost` port, unregister the service worker there.
+
 ## Run the tests
 
-The unit tests cover the pure logic: station selection, the walk-only decision, the GeoJSON parser and the text formats. They use the Node.js test runner and need no packages. Node.js 18 or newer is necessary.
+The unit tests cover the pure logic: station selection, the walk-only decision, the GeoJSON parser and the text formats. A test also checks that `sw.js` lists every file in `src/` and the Leaflet files. The tests use the Node.js test runner and need no packages. Node.js 18 or newer is necessary.
 
 ```sh
 npm test
@@ -115,7 +130,10 @@ You can also run `node --test` directly.
 - `src/location.js`: "Use my location" and the live location dot.
 - `src/trip.js`: trip planning and "Edit trip".
 - `src/journey.js`: the journey: follow the location, refresh the stations, change a station. Also "Clear" and "End journey".
-- `test/`: unit tests for `src/stations.js` and `src/format.js`.
+- `sw.js`: the service worker. It keeps the app files for an offline start and never keeps live data. Add each new file in `src/` to `APP_FILES`.
+- `manifest.webmanifest`: app name, colours and icons.
+- `icons/`: `icon.svg` (the source and the favicon) and the PNG files made from it. To make them again on macOS, run `sips -s format png -z 512 512 icons/icon.svg --out icons/icon-512.png`, then the same command with 192. iOS keeps the old home screen icon until the user adds the app again.
+- `test/`: unit tests for `src/stations.js` and `src/format.js`, and the file list in `sw.js`.
 
 ## License
 
