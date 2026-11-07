@@ -11,6 +11,7 @@ const LEAFLET = "https://unpkg.com/leaflet@1.9.4/dist/";
 // Add each new file in src/ here too. test/sw.test.js checks this.
 const APP_FILES = [
   "./",
+  "about.html",
   "style.css",
   "src/api.js",
   "src/config.js",

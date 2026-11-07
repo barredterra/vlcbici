@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <title>About vlcbici</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="about-page">
+    <main>
+      <p><a href="./">← Back to the map</a></p>
+
+      <h1>vlc<span>bici</span></h1>
+      <p class="lead">
+        Plan a trip across Valencia from door to door: walk to a Valenbisi
+        station that has bikes, ride, return the bike at a station with free
+        docks, and walk to your destination.
+      </p>
+
+      <h2>What it does</h2>
+      <ul>
+        <li>
+          You enter a start and a destination: an address, a point on the map
+          or your current location.
+        </li>
+        <li>
+          The app loads live Valenbisi station data and picks the nearest
+          pickup station with 3 or more bikes and the nearest return station
+          with 3 or more free docks.
+        </li>
+        <li>
+          It shows the walk, the ride and the second walk together on the map,
+          with distance, time and turn-by-turn directions. If the bike does not
+          help, it shows only a walking route.
+        </li>
+        <li>
+          During the ride, it checks the stations every minute and tells you
+          when your pickup station runs out of bikes or your return station
+          runs out of docks.
+        </li>
+      </ul>
+
+      <h2>Why it exists</h2>
+      <p>
+        I spent a workation in Valencia and got around by Valenbisi. The
+        official Valenbisi app shows the stations, but it does not plan a route.
+        I did not notice that Google Maps has a similar feature. As an
+        occasional OpenStreetMap contributor, I asked Claude, an AI assistant,
+        to put the city's open station data on an OpenStreetMap map and to
+        build a small interface for it. This app is the result.
+      </p>
+
+      <h2>Open source, no tracking</h2>
+      <p>
+        Unlike Google Maps, vlcbici is open source and does not track you. It
+        has no accounts, no analytics, no ads and no cookies, and it stores
+        nothing about you. Your location stays in your browser until you plan a
+        trip.
+      </p>
+      <p>
+        To plan a trip, your browser sends the addresses that you type to the
+        Nominatim geocoder, and the start, stations and destination to the OSRM
+        routing server. Map tiles come from OpenStreetMap. These are public
+        community services. The app has no backend of its own: its web server
+        only delivers the app files.
+      </p>
+      <p>
+        The code is on
+        <a href="https://github.com/barredterra/vlcbici">GitHub</a> under the
+        MIT License.
+      </p>
+
+      <h2>Data</h2>
+      <ul>
+        <li>
+          Station availability and bike network:
+          <a
+            href="https://opendata.vlci.valencia.es/en/dataset/valenbisi-disponibilitat-valenbisi-dsiponibilidad"
+            >Valencia Open Data</a
+          >, CC BY 4.0.
+        </li>
+        <li>
+          Map:
+          <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
+          contributors, ODbL. Cycling map style by
+          <a href="https://www.cyclosm.org/">CyclOSM</a>.
+        </li>
+        <li>
+          Routing: <a href="https://routing.openstreetmap.de/">OSRM by FOSSGIS</a>.
+          Geocoding:
+          <a href="https://nominatim.openstreetmap.org/">Nominatim</a>.
+        </li>
+      </ul>
+
+      <p class="disclaimer">
+        Unofficial app. Not affiliated with Valenbisi, JCDecaux or the City of
+        Valencia. Station data can be out of date. Check the station before you
+        rely on it. You unlock the bike in the official Valenbisi app.
+      </p>
+    </main>
+  </body>
+</html>

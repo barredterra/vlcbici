@@ -118,6 +118,7 @@ You can also run `node --test` directly.
 ## Project structure
 
 - `index.html`: page layout. It loads Leaflet, then `src/main.js` as a module.
+- `about.html`: the about page: what the app does, why it exists, privacy and data credits.
 - `style.css`: styles, including the mobile layout.
 - `src/main.js`: connects the page events to the modules and starts the app.
 - `src/config.js`: data URLs, limits and line styles.

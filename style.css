@@ -345,6 +345,10 @@ body:not([data-mode="riding"]) .ride-actions,
   font-size: 12px;
 }
 
+.disclaimer a {
+  color: inherit;
+}
+
 /* The legs and station cards read as a timeline. Each leg has a vertical
    line that matches the line on the map (dotted dark walk, solid magenta
    bike). The line runs through the centre of the station icons: card border
@@ -708,4 +712,44 @@ a.station-card:hover {
     transform: scale(2);
     opacity: 0.4;
   }
+}
+
+/* about.html: a plain text page, no map. */
+.about-page main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(16px + env(safe-area-inset-top)) 16px
+    calc(32px + env(safe-area-inset-bottom));
+  line-height: 1.5;
+}
+
+.about-page h1 {
+  margin: 8px 0;
+  font-size: 17px;
+}
+
+.about-page h1 span {
+  color: var(--dest);
+}
+
+.about-page h2 {
+  margin: 24px 0 6px;
+  font-size: 15px;
+}
+
+.about-page p,
+.about-page ul {
+  margin: 6px 0;
+}
+
+.about-page ul {
+  padding-left: 20px;
+}
+
+.about-page a {
+  color: var(--ink);
+}
+
+.about-page .disclaimer {
+  margin-top: 24px;
 }
