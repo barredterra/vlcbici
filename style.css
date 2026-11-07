@@ -784,9 +784,13 @@ a.station-card:hover {
    so that iOS Safari does not zoom in when a field gets focus. */
 @media (pointer: coarse) {
   button,
-  .bike-choice,
   input[type="text"] {
     min-height: 44px;
+  }
+
+  /* 38px plus the 3px track on each side: as tall as the buttons. */
+  .bike-choice label {
+    min-height: 38px;
   }
 
   .icon-button {
