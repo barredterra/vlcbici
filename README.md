@@ -60,6 +60,8 @@ During the journey, a station popup has "Pick up here" and "Return here" buttons
 - "Pick up here" makes this the pickup station. The trip then begins with a walk from your live location to the station, if the app knows your location.
 - "Return here" makes this the return station. The walk to your destination starts from the new station.
 
+You unlock the bike in the official Valenbisi app. The pickup station card is a link to this app. The link opens the app if it is installed, otherwise the station map on the Valenbisi website. The Valenbisi app always opens on its start screen, because it has no links to a specific station. Use the station number to find the station in the app.
+
 During a bike trip, the app loads the station data again every minute. If the pickup station has fewer than 3 bikes, or the return station has fewer than 3 free docks, the app shows a message.
 
 "End journey" removes the trip and opens an empty form.

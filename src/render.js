@@ -1,6 +1,6 @@
 // HTML for the station popups and the trip summary.
 
-import { MIN_BIKES, MIN_DOCKS } from "./config.js";
+import { MIN_BIKES, MIN_DOCKS, VALENBISI_APP_URL } from "./config.js";
 import { isStationLive } from "./stations.js";
 import {
   escapeHtml,
@@ -79,6 +79,7 @@ export function renderSummary(trip) {
         "Pick up a bike",
         pickup,
         `${pickup.bikes} bikes`,
+        { href: VALENBISI_APP_URL, label: "Open Valenbisi app" },
       ) +
       legHtml(leg) +
       stationCardHtml(
@@ -140,15 +141,18 @@ function legHtml(leg) {
     </div>`;
 }
 
-function stationCardHtml(icon, action, station, count) {
-  return `
-    <div class="station-card">
+// link: optional { href, label }. Then the whole card is a link. It opens in a
+// new tab, so the trip stays open when the website loads instead of the app.
+function stationCardHtml(icon, action, station, count, link) {
+  const content = `
       <div class="station-icon">${icon}</div>
       <div class="station-text">
         <div class="station-action">${action}</div>
         <div class="station-address">${escapeHtml(station.address)}</div>
         <div class="station-name">Station ${station.id}</div>
+        ${link ? `<div class="station-link">${link.label} &nearr;</div>` : ""}
       </div>
-      <div class="station-count">${count}</div>
-    </div>`;
+      <div class="station-count">${count}</div>`;
+  if (!link) return `<div class="station-card">${content}</div>`;
+  return `<a class="station-card" href="${link.href}" target="_blank" rel="noopener">${content}</a>`;
 }

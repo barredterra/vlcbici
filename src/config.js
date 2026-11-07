@@ -21,6 +21,11 @@ export const MAX_DISTANCE_TO_NETWORK_M = 2000; // farther from every station = o
 export const MAX_SNAP_DISTANCE_M = 300; // farther from a road or path = point is not routable
 export const GEOCODER_INTERVAL_MS = 1000; // Nominatim policy: max 1 request per second
 export const VALENCIA_CENTER = [39.4699, -0.3763];
+// Opens the official app if installed (valenbisi.es is an app link on iOS and Android),
+// else the station map on the website. The app has no link to a station: it uses these
+// links only for the login redirect, and its custom scheme only opens the map (checked
+// in Android app 3.6.1).
+export const VALENBISI_APP_URL = "https://www.valenbisi.es/en/mapping";
 
 // While riding, the station counts refresh every minute, and the map follows at street level.
 export const STATION_REFRESH_MS = 60 * 1000;
