@@ -43,7 +43,9 @@ import {
 import {
   clearMessage,
   destInput,
+  routeForm,
   setMode,
+  showPanelBody,
   showMessage,
   startInput,
   summaryBox,
@@ -68,10 +70,18 @@ export function startJourney() {
   stationRefreshTimer = setInterval(refreshTripStations, STATION_REFRESH_MS);
 }
 
-// "Clear" and "End journey": also ends a journey.
+// "Edit", with a plan or while riding: back to the form, with the points kept.
+export function editTrip() {
+  stopJourney();
+  setMode("planning");
+  showPanelBody();
+  // On phones the sheet is still scrolled down to the trip, below the form.
+  routeForm.scrollIntoView({ block: "start" });
+}
+
+// "Clear" and "End journey".
 export function clearAll() {
-  clearInterval(stationRefreshTimer);
-  state.followingLocation = false;
+  stopJourney();
   state.startPoint = null;
   state.destPoint = null;
   startInput.value = "";
@@ -82,6 +92,11 @@ export function clearAll() {
   state.currentTrip = null;
   clearMessage();
   setMode("planning");
+}
+
+function stopJourney() {
+  clearInterval(stationRefreshTimer);
+  state.followingLocation = false;
 }
 
 // Follow the live location (again, after a drag), at street level:

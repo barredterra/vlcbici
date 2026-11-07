@@ -39,10 +39,8 @@ import {
 import {
   clearMessage,
   destInput,
-  messageBox,
   ownBikeInput,
   planButton,
-  routeForm,
   setFormDisabled,
   setMode,
   showMessage,
@@ -86,9 +84,8 @@ export async function planRoute(event) {
     // Before fitBounds: the form closes, so the phone sheet gets shorter.
     setMode("planned");
     map.fitBounds(routeLayer.getBounds(), paddingOutsidePanel());
-    // In a short panel (phones, landscape) the plan can be below the fold: bring it into view.
-    const firstResult = messageBox.textContent ? messageBox : tripCard;
-    firstResult.scrollIntoView({ block: "start" });
+    // The body can still be scrolled down from the form: bring the plan into view.
+    tripCard.scrollIntoView({ block: "start" });
   } catch (err) {
     showMessage(err.message, "error");
   } finally {
@@ -190,12 +187,6 @@ async function planOwnBikeTrip(start, destination) {
   }
   const trip = ownBikeTrip(legs, start, destination, parking, spots);
   return { trip: trip, warnings: warnings };
-}
-
-export function editTrip() {
-  setMode("planning");
-  // On phones the sheet is still scrolled down to the trip, below the form.
-  routeForm.scrollIntoView({ block: "start" });
 }
 
 // Walk to the pickup station (only with an origin), ride, then walk to the destination.

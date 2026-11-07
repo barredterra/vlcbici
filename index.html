@@ -23,29 +23,30 @@
     <div id="map"></div>
 
     <aside id="panel">
+      <!-- A bottom sheet. Drag the header to resize the body below it (src/panel.js).
+           The action bar shows only the next step, so that the body can stay hidden.
+           style.css shows the buttons for each trip mode (body data-mode). -->
       <header id="panel-header">
-        <h1>vlc<span>bici</span></h1>
-        <!-- Icons from Lucide (ISC licence): "chevron-down" and "locate-fixed". -->
+        <h1 class="visually-hidden">vlcbici</h1>
         <button
-          id="toggle-panel"
-          class="icon-button"
+          id="sheet-handle"
           type="button"
           aria-expanded="true"
-          aria-label="Hide panel"
-          title="Hide panel"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </button>
-      </header>
-
-      <div id="panel-body">
-        <form id="route-form" class="card">
+          aria-label="Show or hide details"
+          title="Show or hide details"
+        ></button>
+        <!-- Icons from Lucide (ISC licence): "pencil" and "locate-fixed". -->
+        <div id="action-bar">
           <fieldset class="bike-choice">
             <legend>Bike</legend>
             <label
-              ><input type="radio" name="bike" value="valenbisi" checked />
+              ><input
+                type="radio"
+                name="bike"
+                value="valenbisi"
+                form="route-form"
+                checked
+              />
               Valenbisi</label
             >
             <label
@@ -54,11 +55,49 @@
                 type="radio"
                 name="bike"
                 value="own"
+                form="route-form"
               />
-              My own bike</label
+              Own bike</label
             >
           </fieldset>
+          <button id="plan-button" type="submit" form="route-form">
+            Plan route
+          </button>
+          <button
+            id="edit-trip-button"
+            class="icon-button secondary"
+            type="button"
+            aria-label="Edit trip"
+            title="Edit trip"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+              />
+              <path d="m15 5 4 4" />
+            </svg>
+          </button>
+          <button id="start-journey-button" type="button">Start journey</button>
+          <button
+            id="follow-button"
+            class="icon-button secondary"
+            type="button"
+            aria-label="Follow me"
+            title="Follow me"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M2 12h3M19 12h3M12 2v3M12 19v3" />
+              <circle cx="12" cy="12" r="7" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+          <button id="end-journey-button" type="button">End journey</button>
+        </div>
+        <div id="message" role="status"></div>
+      </header>
 
+      <div id="panel-body">
+        <form id="route-form" class="card">
           <label for="start-input"
             ><span class="ab-badge" aria-hidden="true">A</span>Start</label
           >
@@ -100,34 +139,12 @@
             destination.
           </p>
 
-          <div class="row">
-            <button id="plan-button" type="submit">Plan route</button>
-            <button id="clear-button" type="button" class="secondary">
-              Clear
-            </button>
-          </div>
+          <button id="clear-button" type="button" class="secondary">
+            Clear
+          </button>
         </form>
 
-        <div id="message" role="status"></div>
         <div id="trip" class="card">
-          <!-- style.css shows one row per trip mode (body data-mode).
-               Above the trip, so that a long trip does not push them out of view. -->
-          <div id="planned-actions" class="row">
-            <button id="start-journey-button" type="button">
-              Start journey
-            </button>
-            <button id="edit-trip-button" type="button" class="secondary">
-              Edit trip
-            </button>
-          </div>
-          <div id="riding-actions" class="row">
-            <button id="follow-button" type="button" class="secondary">
-              Follow me
-            </button>
-            <button id="end-journey-button" type="button" class="secondary">
-              End journey
-            </button>
-          </div>
           <div id="summary"></div>
         </div>
 

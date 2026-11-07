@@ -7,9 +7,10 @@ import { STATION_REFRESH_MS } from "./config.js";
 import { drawStations, map, stationLayer } from "./map.js";
 import { onMapClick, onStationButtonClick } from "./points.js";
 import { useMyLocation, watchLiveLocationIfAllowed } from "./location.js";
-import { editTrip, planRoute } from "./trip.js";
+import { planRoute } from "./trip.js";
 import {
   clearAll,
+  editTrip,
   followLocation,
   onParkHereClick,
   onRideStationClick,
@@ -20,11 +21,8 @@ import {
   destInput,
   messageBox,
   ownBikeInput,
-  routeForm,
   showMessage,
   startInput,
-  toggleButton,
-  togglePanel,
 } from "./panel.js";
 import { state } from "./state.js";
 
@@ -51,7 +49,6 @@ document
 map.on("dragstart", function () {
   state.followingLocation = false;
 });
-toggleButton.addEventListener("click", togglePanel);
 startInput.addEventListener("input", function () {
   state.startPoint = null;
 });
@@ -66,13 +63,14 @@ try {
   ownBikeInput.checked = localStorage.getItem(BIKE_CHOICE_KEY) === "own";
 } catch (err) {}
 showBikeChoice();
-routeForm.addEventListener("change", function (event) {
-  if (event.target.name !== "bike") return;
-  showBikeChoice();
-  try {
-    localStorage.setItem(BIKE_CHOICE_KEY, event.target.value);
-  } catch (err) {}
-});
+document
+  .querySelector(".bike-choice")
+  .addEventListener("change", function (event) {
+    showBikeChoice();
+    try {
+      localStorage.setItem(BIKE_CHOICE_KEY, event.target.value);
+    } catch (err) {}
+  });
 
 // With an own bike, the Valenbisi stations are noise: hide them and their legend.
 function showBikeChoice() {

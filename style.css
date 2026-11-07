@@ -54,77 +54,125 @@ body {
   right: env(safe-area-inset-right);
 }
 
-/* The panel itself is transparent: the header and the three parts (route form,
-   trip, station legend) float on the map as separate cards, 10px apart. */
+/* Phones: a bottom sheet, the action bar on top, the body below it. Drag the header to
+   resize the body (src/panel.js). Wider screens: a fixed sidebar on the left (see below).
+   The map controls are top right. */
 #panel {
   position: absolute;
-  top: env(safe-area-inset-top);
-  left: env(safe-area-inset-left);
+  bottom: 0;
+  left: 0;
   z-index: 1000;
-  width: 380px; /* 360px cards plus 10px each side for their shadow */
-  max-height: calc(100% - env(safe-area-inset-top));
+  width: 100%;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
-}
-
-#panel-header,
-.card,
-#message {
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-}
-
-#panel-header,
-.card {
+  /* The bar stays above the home indicator and clear of the notch in landscape. */
+  padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+  border-radius: 12px 12px 0 0;
   background: #fff;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.25);
 }
 
+/* No scrolling or zooming the page while dragging the header. */
 #panel-header {
+  touch-action: none;
+}
+
+/* The grab handle: a short grey bar, centred. */
+#sheet-handle {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  height: 20px;
+  padding: 0;
+  background: none;
+  cursor: grab;
+}
+
+#sheet-handle::before {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 4px;
+  margin: 0 auto;
+  border-radius: 2px;
+  background: #cbd5e1;
+}
+
+/* The action bar: the next step for the trip mode. */
+#action-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin: 10px 10px 0;
-  padding: 10px 12px;
+  gap: 6px;
+  padding: 0 10px 10px;
 }
 
-#panel.collapsed #panel-header {
-  margin-bottom: 10px;
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 
-#panel-header h1 {
-  margin: 0;
-  font-size: 17px;
-}
-
-#panel-header h1 span {
-  color: var(--dest);
-}
-
-/* The padding leaves room for the card shadows inside the scroll area. */
+/* Height: auto up to this limit, or the height set by a drag (src/panel.js). */
 #panel-body {
-  padding: 10px;
+  height: var(--dragged-height, auto);
+  max-height: var(--dragged-height, 45dvh);
   overflow-y: auto;
-  scroll-padding-top: 10px;
 }
 
-#panel-body > * + * {
-  margin-top: 10px;
+/* Same breakpoint as paddingOutsidePanel() in src/map.js. */
+@media (min-width: 601px) {
+  #panel {
+    top: 0;
+    width: 380px;
+    max-width: none;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom)
+      env(safe-area-inset-left);
+    border-radius: 0;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.25);
+  }
+
+  #sheet-handle {
+    display: none;
+  }
+
+  #action-bar {
+    padding-top: 10px;
+  }
+
+  /* The body fills the sidebar below the header and scrolls. */
+  #panel-body {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+  }
 }
 
+/* The sections of the body, separated by lines. */
 .card {
   padding: 10px 12px;
+  border-top: 1px solid #e2e8f0;
 }
 
 .card > label:first-child {
   margin-top: 0;
 }
 
-/* "Valenbisi" or "My own bike": two halves of one switch, the chosen one dark. */
+/* "Valenbisi" or "Own bike": a segmented control. The chosen half is a white segment on a
+   grey track, so that it does not look like a dark primary button. */
 .bike-choice {
+  flex: 1;
   display: flex;
-  margin: 0 0 4px;
-  padding: 0;
+  min-width: 0;
+  margin: 0;
+  padding: 3px;
   border: 0;
+  border-radius: 7px;
+  background: #f1f5f9;
 }
 
 .bike-choice legend {
@@ -140,24 +188,19 @@ body {
   flex: 1;
   justify-content: center;
   margin: 0;
-  padding: 7px 10px;
-  background: #f1f5f9;
-  color: #334155;
+  padding: 4px 10px;
+  border-radius: 5px;
+  color: var(--muted);
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
 }
 
-.bike-choice label:first-of-type {
-  border-radius: 5px 0 0 5px;
-}
-
-.bike-choice label:last-of-type {
-  border-radius: 0 5px 5px 0;
-}
-
 .bike-choice label:has(input:checked) {
-  background: var(--ink);
-  color: #fff;
+  background: #fff;
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
 }
 
 .bike-choice label:has(input:focus-visible) {
@@ -168,10 +211,6 @@ body {
 .bike-choice input {
   position: absolute;
   opacity: 0;
-}
-
-#panel.collapsed #panel-body {
-  display: none;
 }
 
 label {
@@ -245,8 +284,7 @@ button {
 }
 
 button.secondary,
-#locate-button,
-#toggle-panel {
+#locate-button {
   background: #f1f5f9;
   color: #334155;
 }
@@ -254,10 +292,6 @@ button.secondary,
 button:disabled {
   opacity: 0.6;
   cursor: wait;
-}
-
-#plan-button {
-  flex: 1;
 }
 
 /* Square button with a Lucide icon instead of a text label. */
@@ -279,16 +313,8 @@ button:disabled {
   stroke-linejoin: round;
 }
 
-/* The caret points where the panel goes: up to hide it at the top of the screen. */
-#toggle-panel svg {
-  transform: rotate(180deg);
-}
-#panel.collapsed #toggle-panel svg {
-  transform: none;
-}
-
 .hint {
-  margin: 6px 0 10px;
+  margin: 6px 0 8px;
   font-size: 12px;
   color: var(--muted);
 }
@@ -318,18 +344,34 @@ body:not([data-mode="riding"]) .ride-actions,
   margin-top: 0;
 }
 
-#planned-actions,
-#riding-actions {
+/* The action bar for each trip mode. Planning: the bike switch, and "Plan route" when
+   both fields have text (picked or typed). Planned: "Edit" and "Start journey".
+   Riding: "Edit", "Follow me" and "End journey". */
+#plan-button,
+#edit-trip-button,
+#start-journey-button,
+#follow-button,
+#end-journey-button,
+body:not([data-mode="planning"]) .bike-choice {
   display: none;
-  margin-bottom: 8px;
 }
 
-[data-mode="planned"] #planned-actions,
-[data-mode="riding"] #riding-actions {
-  display: flex;
+[data-mode="planning"]:has(#start-input:not(:placeholder-shown)):has(
+    #dest-input:not(:placeholder-shown)
+  )
+  #plan-button,
+[data-mode="planned"] #edit-trip-button,
+[data-mode="planned"] #start-journey-button,
+[data-mode="riding"] #edit-trip-button,
+[data-mode="riding"] #follow-button,
+[data-mode="riding"] #end-journey-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#start-journey-button {
+#start-journey-button,
+#end-journey-button {
   flex: 1;
 }
 
@@ -338,6 +380,12 @@ body:not([data-mode="riding"]) .ride-actions,
   font-size: 18px;
   font-weight: 700;
   line-height: 1.1;
+}
+
+/* In the header, so that it stays visible when the body is hidden. */
+#message {
+  margin: 0 10px 10px;
+  border-radius: 5px;
 }
 
 #message.error {
@@ -611,7 +659,9 @@ body:not([data-mode="riding"]) .ride-actions,
   padding: 3px 7px;
   border: none;
   border-radius: 5px;
-  font: 600 12px system-ui, sans-serif;
+  font:
+    600 12px system-ui,
+    sans-serif;
   color: var(--ink);
 }
 
@@ -673,7 +723,9 @@ a.station-card:hover {
   border-radius: 3px;
   background: #1d4ed8;
   color: #fff;
-  font: bold 10px system-ui, sans-serif;
+  font:
+    bold 10px system-ui,
+    sans-serif;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
@@ -695,24 +747,6 @@ a.station-card:hover {
 }
 
 @media (max-width: 600px) {
-  #panel {
-    top: auto;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    max-height: 55%;
-    /* The cards stay above the home indicator. */
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  /* The sheet sits at the bottom: down to hide, up to show. */
-  #toggle-panel svg {
-    transform: none;
-  }
-  #panel.collapsed #toggle-panel svg {
-    transform: rotate(180deg);
-  }
-
   /* Pinch to zoom instead. */
   .leaflet-control-zoom {
     display: none;
@@ -728,7 +762,7 @@ a.station-card:hover {
    so that iOS Safari does not zoom in when a field gets focus. */
 @media (pointer: coarse) {
   button,
-  .bike-choice label,
+  .bike-choice,
   input[type="text"] {
     min-height: 44px;
   }

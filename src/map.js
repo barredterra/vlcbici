@@ -17,10 +17,10 @@ import { panel, showMessage } from "./panel.js";
 import { state } from "./state.js";
 
 export const map = L.map("map").setView(VALENCIA_CENTER, 14);
-// Top right, so the panel (bottom sheet on phones) never covers the OSM credit.
+// Top right, so the bottom sheet never covers the OSM credit.
 // Set it before adding layers: setPosition re-adds the control, which counts their credits twice.
 map.attributionControl.setPosition("topright");
-// Zoom buttons below the attribution, above the layer switcher: the panel has the left side.
+// Zoom buttons below the attribution, above the layer switcher.
 // Phones hide them (style.css) and use pinch zoom.
 map.zoomControl.setPosition("topright");
 const OSM_CREDIT =
@@ -201,27 +201,27 @@ export function drawLegs(legs) {
   });
 }
 
-// Keep the route clear of the panel (right of it on desktop, above it on phones)
-// and of the buttons on the right. The layer button is the wider one, and phones hide zoom.
+// Keep the route clear of the panel (above the bottom sheet on phones, right of the
+// sidebar on wider screens) and of the buttons on the right. The layer button is the
+// wider one, and phones hide zoom.
 export function paddingOutsidePanel() {
   const margin = 30;
   const buttonsLeft = layersControl.getContainer().getBoundingClientRect().left;
   const rightPadding = map.getSize().x - buttonsLeft + margin;
-  const isPhone = window.matchMedia("(max-width: 600px)").matches;
-  if (isPhone) {
-    // On phones the attribution wraps to several lines across the top.
-    const attributionBottom = map.attributionControl
-      .getContainer()
-      .getBoundingClientRect().bottom;
+  const isSidebar = window.matchMedia("(min-width: 601px)").matches; // as in style.css
+  if (isSidebar) {
     return {
-      paddingTopLeft: [margin, attributionBottom + margin],
-      paddingBottomRight: [rightPadding, panel.offsetHeight + margin],
+      paddingTopLeft: [panel.offsetWidth + margin, margin],
+      paddingBottomRight: [rightPadding, margin],
     };
   }
-  const panelRight = panel.offsetLeft + panel.offsetWidth;
+  // On phones the attribution wraps to several lines across the top.
+  const attributionBottom = map.attributionControl
+    .getContainer()
+    .getBoundingClientRect().bottom;
   return {
-    paddingTopLeft: [panelRight + margin, margin],
-    paddingBottomRight: [rightPadding, margin],
+    paddingTopLeft: [margin, attributionBottom + margin],
+    paddingBottomRight: [rightPadding, panel.offsetHeight + margin],
   };
 }
 

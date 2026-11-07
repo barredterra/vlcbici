@@ -50,9 +50,9 @@ Map clicks and the "Start" and "Destination" buttons work only while the form is
 
 ## Own bike
 
-Above the form, choose "Valenbisi" or "My own bike". The app remembers this choice in your browser for the next visit.
+In the action bar, choose "Valenbisi" or "Own bike". The app remembers this choice in your browser for the next visit.
 
-With "My own bike":
+With "Own bike":
 
 1. The app looks for public bike parking with 4 or more spaces within 300 m of the destination. The data comes from the City of Valencia.
 2. It selects the parking spot nearest to the destination.
@@ -61,14 +61,22 @@ With "My own bike":
 
 If no parking spot is found, the app shows a ride to the destination and a message.
 
-The map does not show the Valenbisi stations and their legend while "My own bike" is selected. A station that you picked with the "Start" or "Destination" button counts as a normal point. The "outside the Valenbisi area" check does not apply.
+The map does not show the Valenbisi stations and their legend while "Own bike" is selected. A station that you picked with the "Start" or "Destination" button counts as a normal point. The "outside the Valenbisi area" check does not apply.
+
+## Action bar
+
+On a phone, the panel is a sheet at the bottom of the screen. On a wider screen, it is a fixed sidebar on the left. The action bar at its top shows only the next step. Thus you can keep the rest of the sheet hidden and use the map:
+
+1. Choose "Valenbisi" or "Own bike". When the start and the destination have text, "Plan route" shows.
+2. After a plan: "Edit" and "Start journey".
+3. During the journey: "Edit" (pencil), "Follow me" and "End journey".
+
+On a phone, drag the bar up or down to show more or less of the form, the trip summary and the station legend. Drag it to the bottom, or tap the handle above it, to hide them. Tap the handle again to show them. Messages show below the bar, so they stay visible.
 
 ## Start the journey
 
-After a plan, the form closes. The trip has two buttons:
-
 - "Start journey" starts the ride. The map follows your live location until you drag the map. "Follow me" turns this on again.
-- "Edit trip" opens the form again. The current trip stays on the map until you plan a new trip or click "Clear".
+- "Edit" opens the form again and stops the journey. The current trip stays on the map until you plan a new trip or click "Clear".
 
 During the journey, a station popup has "Pick up here" and "Return here" buttons. They plan the trip again with this station:
 
@@ -142,13 +150,13 @@ You can also run `node --test` directly.
 - `src/format.js`: text for distances, times, ages and directions. No DOM, no Leaflet.
 - `src/api.js`: network calls for stations, bike parking, geocoding and routes.
 - `src/state.js`: the app state that more than one module uses.
-- `src/panel.js`: the panel elements, the status message and the trip mode.
+- `src/panel.js`: the panel elements, the status message, the trip mode and the sheet drag.
 - `src/render.js`: HTML for the station and parking popups and the trip summary.
 - `src/map.js`: the Leaflet map, the map styles, the city bike network and the map layers.
 - `src/points.js`: the start and destination points, from map clicks and station popups.
 - `src/location.js`: "Use my location" and the live location dot.
-- `src/trip.js`: trip planning (Valenbisi and own bike) and "Edit trip".
-- `src/journey.js`: the journey: follow the location, refresh the stations, change a station. Also "Clear" and "End journey".
+- `src/trip.js`: trip planning (Valenbisi and own bike).
+- `src/journey.js`: the journey: follow the location, refresh the stations, change a station. Also "Edit", "Clear" and "End journey".
 - `sw.js`: the service worker. It keeps the app files for an offline start and never keeps live data. Add each new file in `src/` to `APP_FILES`.
 - `manifest.webmanifest`: app name, colours and icons.
 - `icons/`: `icon.svg` (the source and the favicon) and the PNG files made from it. To make them again on macOS, run `sips -s format png -z 512 512 icons/icon.svg --out icons/icon-512.png`, then the same command with 192. iOS keeps the old home screen icon until the user adds the app again.
