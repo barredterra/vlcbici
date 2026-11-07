@@ -112,6 +112,20 @@ function endpointHtml(letter, kind, point) {
     </div>`;
 }
 
+// The open labels next to the pickup and return pins on the map.
+export function pickupCountLabel(station) {
+  return countLabelHtml(station.bikes, "free bikes", MIN_BIKES);
+}
+
+export function returnCountLabel(station) {
+  return countLabelHtml(station.docks, "free docks", MIN_DOCKS);
+}
+
+function countLabelHtml(count, label, minimum) {
+  const low = count < minimum ? " low" : "";
+  return `<span class="count-label${low}">${count} ${label}</span>`;
+}
+
 function popupStatHtml(icon, count, label, minimum) {
   const low = count < minimum ? " low" : "";
   return `

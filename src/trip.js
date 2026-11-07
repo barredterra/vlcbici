@@ -24,7 +24,13 @@ import {
 } from "./map.js";
 import { drawPoints } from "./points.js";
 import { livePosition } from "./location.js";
-import { BIKE_ICON, PARKING_ICON, renderSummary } from "./render.js";
+import {
+  BIKE_ICON,
+  PARKING_ICON,
+  pickupCountLabel,
+  renderSummary,
+  returnCountLabel,
+} from "./render.js";
 import {
   clearMessage,
   destInput,
@@ -215,10 +221,20 @@ export async function fetchLegs(plannedLegs) {
 }
 
 // Adds the pickup and return pins to the route layer and returns the trip.
-// The journey refreshes the counts in their popups.
+// The journey refreshes the counts in their popups and labels.
 export function bikeTrip(legs, origin, start, destination, pickup, dropoff) {
-  const pickupMarker = stationMarker(pickup, BIKE_ICON, "Pickup station");
-  const dropoffMarker = stationMarker(dropoff, PARKING_ICON, "Return station");
+  const pickupMarker = stationMarker(
+    pickup,
+    BIKE_ICON,
+    "Pickup station",
+    pickupCountLabel(pickup),
+  );
+  const dropoffMarker = stationMarker(
+    dropoff,
+    PARKING_ICON,
+    "Return station",
+    returnCountLabel(dropoff),
+  );
   pickupMarker.addTo(routeLayer);
   dropoffMarker.addTo(routeLayer);
   return {

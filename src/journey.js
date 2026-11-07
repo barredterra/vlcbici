@@ -28,7 +28,12 @@ import {
   watchLiveLocation,
 } from "./location.js";
 import { bikeLegs, bikeTrip, fetchLegs } from "./trip.js";
-import { renderSummary, stationPopup } from "./render.js";
+import {
+  pickupCountLabel,
+  renderSummary,
+  returnCountLabel,
+  stationPopup,
+} from "./render.js";
 import {
   clearMessage,
   destInput,
@@ -170,6 +175,8 @@ async function refreshTripStations() {
   trip.dropoffMarker.setPopupContent(
     stationPopup(trip.dropoff, "Return station"),
   );
+  trip.pickupMarker.setTooltipContent(pickupCountLabel(trip.pickup));
+  trip.dropoffMarker.setTooltipContent(returnCountLabel(trip.dropoff));
 
   // The new summary closes the open "Directions": open them again.
   const openDirections = Array.from(summaryBox.querySelectorAll("details")).map(

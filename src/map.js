@@ -112,6 +112,14 @@ export const routeLayer = L.featureGroup().addTo(map);
 
 // Popup options shared by all station markers; the class hooks the popup styles.
 const STATION_POPUP_OPTIONS = { className: "station-popup", minWidth: 220 };
+// Interactive: a tap on the label opens the station popup, like a tap on the pin.
+const STATION_COUNT_TOOLTIP_OPTIONS = {
+  className: "station-count-tooltip",
+  permanent: true,
+  interactive: true,
+  direction: "right",
+  offset: [15, 0],
+};
 
 export function drawStations(stations) {
   const now = Date.now();
@@ -136,16 +144,16 @@ export function drawStations(stations) {
 }
 
 // The same icons as the station cards in the trip summary.
-export function stationMarker(station, icon, role) {
+// countLabel stays open next to the pin, so the count is visible without a tap.
+export function stationMarker(station, icon, role, countLabel) {
   // Draw above the A/B pins: the pickup is often right next to the start.
   const options = {
     icon: pinIcon(`<span class="pin-icon">${icon}</span>`, "#c026d3"),
     zIndexOffset: 1000,
   };
-  return L.marker([station.lat, station.lon], options).bindPopup(
-    stationPopup(station, role),
-    STATION_POPUP_OPTIONS,
-  );
+  return L.marker([station.lat, station.lon], options)
+    .bindPopup(stationPopup(station, role), STATION_POPUP_OPTIONS)
+    .bindTooltip(countLabel, STATION_COUNT_TOOLTIP_OPTIONS);
 }
 
 // A white outline under each line keeps it readable on busy map styles (CyclOSM).

@@ -547,6 +547,19 @@ body:not([data-mode="riding"]) .ride-actions,
   color: #6b7280;
 }
 
+/* Open label next to the pickup and return pins: "12 free bikes". */
+.station-count-tooltip {
+  padding: 3px 7px;
+  border: none;
+  border-radius: 5px;
+  font: 600 12px system-ui, sans-serif;
+  color: var(--ink);
+}
+
+.station-count-tooltip .count-label.low {
+  color: var(--error-ink);
+}
+
 /* Icon inside the round map pin of the pickup and return stations. */
 .pin-icon {
   display: block;
