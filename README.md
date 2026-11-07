@@ -61,6 +61,8 @@ With "Own bike":
 
 If no parking spot is found, the app shows a ride to the destination and a message.
 
+Before you plan a trip, "Show nearby parking" (next to "Clear") shows the parking spots around your live location, with the same rules. The button shows only when the app knows your location. "Park here" in the popup of a spot plans the ride from your live location to this spot, without a walk at the end.
+
 The map does not show the Valenbisi stations and their legend while "Own bike" is selected. A station that you picked with the "Start" or "Destination" button counts as a normal point. The "outside the Valenbisi area" check does not apply.
 
 ## Action bar

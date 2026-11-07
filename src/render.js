@@ -101,6 +101,17 @@ export function renderSummary(trip) {
     );
   });
 
+  // A trip that ends at a picked return station or parking spot ends with its card:
+  // no B line after it.
+  const destination = trip.destination;
+  const endsAtStation = dropoff && destination.stationId === dropoff.id;
+  const endsAtParking =
+    trip.parking && destination.parkingId === trip.parking.id;
+  const destinationHtml =
+    endsAtStation || endsAtParking
+      ? ""
+      : endpointHtml("B", "dest", destination);
+
   summaryBox.innerHTML = `
     <div class="trip-header">
       <h2>Your trip</h2>
@@ -108,7 +119,7 @@ export function renderSummary(trip) {
     </div>
     ${endpointHtml("A", "start", trip.start)}
     ${legsHtml.join("")}
-    ${endpointHtml("B", "dest", trip.destination)}`;
+    ${destinationHtml}`;
 }
 
 // The A or B end of the timeline. It shows what the geocoder found, so a
@@ -123,13 +134,16 @@ function endpointHtml(letter, kind, point) {
 }
 
 // role: "Bike parking" on the chosen spot, empty on the other spots. Only the other
-// spots get "Park here", handled in onParkHereClick. style.css hides it while planning.
+// spots get "Park here": before a plan onParkingPlanClick (trip.js), with a plan
+// onParkHereClick (journey.js).
 export function parkingPopup(spot, role) {
   const roleHtml = role ? `<div class="popup-role">${role}</div>` : "";
   const actionsHtml = role
     ? ""
     : `<div class="popup-actions park-actions">
-        <button type="button" data-park-spot="${spot.id}">Park here</button>
+        <button type="button" data-park-spot="${spot.id}" data-lat="${spot.lat}" data-lon="${spot.lon}">
+          Park here
+        </button>
       </div>`;
   return `
     ${roleHtml}

@@ -327,13 +327,12 @@ button:disabled {
 
 /* Trip modes: body data-mode is "planning", "planned" or "riding" (setMode in src/panel.js).
    The form and the Start/Destination popup buttons are only for planning, the
-   "Pick up here"/"Return here" popup buttons only for riding. "Park here" works with
-   a plan, before and during the ride. While riding, only the
+   "Pick up here"/"Return here" popup buttons only for riding. "Park here" works in
+   every mode (src/trip.js and src/journey.js). While riding, only the
    trip and the disclaimer stay, without the station legend. */
 body:not([data-mode="planning"]) #route-form,
 body:not([data-mode="planning"]) .plan-actions,
 body:not([data-mode="riding"]) .ride-actions,
-[data-mode="planning"] .park-actions,
 [data-mode="riding"] .station-legend,
 [data-bike="own"] .station-legend {
   display: none;
@@ -371,6 +370,16 @@ body:not([data-mode="planning"]) .bike-choice {
 #start-journey-button,
 #end-journey-button {
   flex: 1;
+}
+
+/* "Show nearby parking": own bike, while planning, and only when the live location is known
+   (body data-located, set in src/location.js). */
+#nearby-parking-button {
+  display: none;
+}
+
+[data-mode="planning"][data-bike="own"][data-located] #nearby-parking-button {
+  display: block;
 }
 
 /* Bigger counts while riding: readable at a glance. Same size as the popup stats. */

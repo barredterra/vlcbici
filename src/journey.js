@@ -13,6 +13,7 @@ import {
   drawLegs,
   drawStations,
   map,
+  nearbyParkingLayer,
   pointLayer,
   routeLayer,
   stationLayer,
@@ -79,6 +80,7 @@ export function clearAll() {
   destInput.value = "";
   pointLayer.clearLayers();
   routeLayer.clearLayers();
+  nearbyParkingLayer.clearLayers();
   summaryBox.innerHTML = "";
   state.currentTrip = null;
   clearMessage();

@@ -4,14 +4,14 @@
 
 import { fetchStations } from "./api.js";
 import { STATION_REFRESH_MS } from "./config.js";
-import { drawStations, map, stationLayer } from "./map.js";
+import { drawStations, map, nearbyParkingLayer, stationLayer } from "./map.js";
 import { onMapClick, onStationButtonClick } from "./points.js";
 import {
   showMyLocation,
   useMyLocation,
   watchLiveLocationIfAllowed,
 } from "./location.js";
-import { planRoute } from "./trip.js";
+import { onParkingPlanClick, planRoute, showNearbyParking } from "./trip.js";
 import {
   clearAll,
   editTrip,
@@ -33,6 +33,7 @@ map.on("click", onMapClick);
 document.addEventListener("click", onStationButtonClick);
 document.addEventListener("click", onRideStationClick);
 document.addEventListener("click", onParkHereClick);
+document.addEventListener("click", onParkingPlanClick);
 document.getElementById("route-form").addEventListener("submit", planRoute);
 document
   .getElementById("locate-button")
@@ -41,6 +42,9 @@ document
   .getElementById("show-location-button")
   .addEventListener("click", showMyLocation);
 document.getElementById("clear-button").addEventListener("click", clearAll);
+document
+  .getElementById("nearby-parking-button")
+  .addEventListener("click", showNearbyParking);
 document
   .getElementById("start-journey-button")
   .addEventListener("click", startJourney);
@@ -76,11 +80,16 @@ document
   });
 
 // With an own bike, the Valenbisi stations are noise: hide them and their legend.
+// With Valenbisi, the nearby bike parking is noise.
 function showBikeChoice() {
   const ownBike = ownBikeInput.checked;
   document.body.dataset.bike = ownBike ? "own" : "valenbisi";
-  if (ownBike) stationLayer.remove();
-  else stationLayer.addTo(map);
+  if (ownBike) {
+    stationLayer.remove();
+  } else {
+    stationLayer.addTo(map);
+    nearbyParkingLayer.clearLayers();
+  }
 }
 
 // Show the station map right away; planning fetches fresh data again.

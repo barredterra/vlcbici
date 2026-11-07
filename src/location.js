@@ -96,6 +96,7 @@ export function watchLiveLocation() {
       liveLocationWatchId = null;
       if (liveLocationMarker) liveLocationMarker.remove();
       liveLocationMarker = null;
+      delete document.body.dataset.located;
     },
     { enableHighAccuracy: true, maximumAge: 10000 },
   );
@@ -135,4 +136,5 @@ function showLiveLocation(position) {
     interactive: false,
     zIndexOffset: 500,
   }).addTo(map);
+  document.body.dataset.located = "true"; // style.css shows "Show nearby parking"
 }

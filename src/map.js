@@ -129,6 +129,8 @@ const stationRenderer = L.canvas({ pane: "stations", tolerance: 8 });
 export const stationLayer = L.layerGroup().addTo(map);
 export const pointLayer = L.layerGroup().addTo(map);
 export const routeLayer = L.featureGroup().addTo(map);
+// "Show nearby parking": the spots around the live location, before a plan.
+export const nearbyParkingLayer = L.layerGroup().addTo(map);
 
 // Popup options shared by all station markers; the class hooks the popup styles.
 const STATION_POPUP_OPTIONS = { className: "station-popup", minWidth: 220 };

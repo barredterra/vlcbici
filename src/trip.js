@@ -21,6 +21,7 @@ import {
   drawLegs,
   drawStations,
   map,
+  nearbyParkingLayer,
   paddingOutsidePanel,
   parkingMarker,
   parkingSpotMarker,
@@ -41,6 +42,7 @@ import {
   destInput,
   ownBikeInput,
   planButton,
+  routeForm,
   setFormDisabled,
   setMode,
   showMessage,
@@ -56,6 +58,7 @@ export async function planRoute(event) {
   summaryBox.innerHTML = "";
   state.currentTrip = null;
   routeLayer.clearLayers();
+  nearbyParkingLayer.clearLayers(); // the plan shows the parking near the destination
   setFormDisabled(true); // no edits, clicks or Clear while a plan is running
   planButton.textContent = "Planning...";
 
@@ -172,9 +175,13 @@ async function planValenbisiTrip(start, destination) {
 
 // Own bike: ride to public bike parking near the destination, then walk.
 // Without parking nearby, ride to the destination. Station points count as plain points.
+// A destination picked with "Park here" is that parking spot: no walk after the ride.
 async function planOwnBikeTrip(start, destination) {
   const spots = await fetchParkingNear(destination);
-  const parking = nearestPoint(spots, destination);
+  const pickedSpot = spots.find(function (spot) {
+    return spot.id === destination.parkingId;
+  });
+  const parking = pickedSpot || nearestPoint(spots, destination);
   const legs = await fetchLegs(ownBikeLegs(start, parking, destination));
   const warnings = [];
   if (!parking) {
@@ -188,6 +195,68 @@ async function planOwnBikeTrip(start, destination) {
   }
   const trip = ownBikeTrip(legs, start, destination, parking, spots);
   return { trip: trip, warnings: warnings };
+}
+
+// Before a plan, "Park here" in a parking popup plans the ride from the live location to
+// this spot. Without a live location, the start stays as it is.
+export function onParkingPlanClick(event) {
+  const button = event.target.closest("[data-park-spot]");
+  if (!button || document.body.dataset.mode !== "planning") return;
+  if (planButton.disabled) return; // a plan is running
+  map.closePopup();
+  const here = livePosition();
+  if (here) {
+    state.startPoint = here;
+    startInput.value = here.label;
+  }
+  state.destPoint = {
+    lat: Number(button.dataset.lat),
+    lon: Number(button.dataset.lon),
+    label: "Public bike parking",
+    parkingId: Number(button.dataset.parkSpot),
+  };
+  destInput.value = state.destPoint.label;
+  drawPoints();
+  routeForm.requestSubmit(); // planRoute()
+}
+
+// Own bike, before a plan: the public bike parking around the live location, with the
+// same rules as near the destination. style.css shows the button only when the location is known.
+export async function showNearbyParking() {
+  const here = livePosition();
+  nearbyParkingLayer.clearLayers();
+  showMessage("Looking for bike parking near you...", "info");
+  let spots;
+  try {
+    spots = await fetchParkingNear(here);
+  } catch (err) {
+    showMessage(err.message, "error");
+    return;
+  }
+  // A plan can start while the request runs. It shows its own parking.
+  if (document.body.dataset.mode !== "planning") return;
+  if (!spots.length) {
+    showMessage(
+      "No public bike parking with " +
+        MIN_PARKING_SPACES +
+        "+ spaces within " +
+        MAX_PARKING_WALK_M +
+        " m of your location.",
+      "info",
+    );
+    return;
+  }
+  clearMessage();
+  spots.forEach(function (spot) {
+    parkingSpotMarker(spot).addTo(nearbyParkingLayer);
+  });
+  const spotsAndHere = L.latLngBounds(
+    spots.map(function (spot) {
+      return [spot.lat, spot.lon];
+    }),
+  ).extend([here.lat, here.lon]);
+  state.followingLocation = false; // "Show my location" would pan away from the spots
+  map.fitBounds(spotsAndHere, paddingOutsidePanel());
 }
 
 // Walk to the pickup station (only with an origin), ride, then walk to the destination.
@@ -268,6 +337,7 @@ export function bikeTrip(legs, origin, start, destination, pickup, dropoff) {
 }
 
 // Ride to the parking spot, then walk. Without a spot, ride to the destination.
+// A destination that is the parking spot itself needs no walk.
 export function ownBikeLegs(start, parking, destination) {
   if (!parking) {
     return [
@@ -281,15 +351,17 @@ export function ownBikeLegs(start, parking, destination) {
       },
     ];
   }
+  const rideLeg = {
+    mode: "bike",
+    title: "Ride to bike parking",
+    router: BIKE_ROUTER_URL,
+    from: start,
+    to: parking,
+    name: "the bike ride",
+  };
+  if (destination.parkingId === parking.id) return [rideLeg];
   return [
-    {
-      mode: "bike",
-      title: "Ride to bike parking",
-      router: BIKE_ROUTER_URL,
-      from: start,
-      to: parking,
-      name: "the bike ride",
-    },
+    rideLeg,
     {
       mode: "walk",
       title: "Walk to destination",
