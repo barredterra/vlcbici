@@ -27,6 +27,7 @@ import {
   showMessage,
   startInput,
 } from "./panel.js";
+import { onAppLinkClick } from "./render.js";
 import { state } from "./state.js";
 
 map.on("preclick", onMapPreclick);
@@ -35,6 +36,7 @@ document.addEventListener("click", onStationButtonClick);
 document.addEventListener("click", onRideStationClick);
 document.addEventListener("click", onParkHereClick);
 document.addEventListener("click", onParkingPlanClick);
+document.addEventListener("click", onAppLinkClick);
 document.getElementById("route-form").addEventListener("submit", planRoute);
 document
   .getElementById("locate-button")

@@ -707,6 +707,20 @@ a.station-card {
 a.station-card:hover {
   border-color: var(--brand);
 }
+/* Instant feedback on tap: the Valenbisi app can take some seconds to open. */
+a.station-card:active,
+a.station-card.opening {
+  border-color: var(--brand);
+  background: var(--brand-tint);
+}
+a.station-card.opening .station-link {
+  animation: opening-blink 0.8s ease-in-out infinite alternate;
+}
+@keyframes opening-blink {
+  to {
+    opacity: 0.4;
+  }
+}
 .station-link {
   margin-top: 2px;
   color: var(--brand);
@@ -853,6 +867,9 @@ a.station-card:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  a.station-card.opening .station-link {
+    animation: none;
+  }
   .live-location .pulse {
     animation: none;
     transform: scale(2);

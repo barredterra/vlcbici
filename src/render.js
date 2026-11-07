@@ -226,3 +226,25 @@ function stationCardHtml(icon, action, station, count, link) {
   if (!link) return `<div class="station-card">${content}</div>`;
   return `<a class="station-card" href="${link.href}" target="_blank" rel="noopener">${content}</a>`;
 }
+
+// The Valenbisi app can take some seconds to open. Show at once that the tap worked,
+// until the user comes back to this page (or after 10 s, if no app or tab opens).
+export function onAppLinkClick(event) {
+  const card = event.target.closest("a.station-card");
+  if (!card || card.classList.contains("opening")) return;
+  const link = card.querySelector(".station-link");
+  const label = link.textContent;
+  card.classList.add("opening");
+  link.textContent = "Opening Valenbisi app…";
+
+  function reset() {
+    card.classList.remove("opening");
+    link.textContent = label;
+    document.removeEventListener("visibilitychange", onVisible);
+  }
+  function onVisible() {
+    if (document.visibilityState === "visible") reset();
+  }
+  document.addEventListener("visibilitychange", onVisible);
+  setTimeout(reset, 10000);
+}
