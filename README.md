@@ -69,13 +69,15 @@ On a phone, the panel is a sheet at the bottom of the screen. On a wider screen,
 
 1. Choose "Valenbisi" or "Own bike". When the start and the destination have text, "Plan route" shows.
 2. After a plan: "Edit" and "Start journey".
-3. During the journey: "Edit" (pencil), "Follow me" and "End journey".
+3. During the journey: "Edit" (pencil) and "End journey".
+
+"Show my location" is on the map, below the layer switcher, in every step. The map then follows your location until you drag the map. To use your location as the start, use "Use my location" next to the start field.
 
 On a phone, drag the bar up or down to show more or less of the form, the trip summary and the station legend. Drag it to the bottom, or tap the handle above it, to hide them. Tap the handle again to show them. Messages show below the bar, so they stay visible.
 
 ## Start the journey
 
-- "Start journey" starts the ride. The map follows your live location until you drag the map. "Follow me" turns this on again.
+- "Start journey" starts the ride. The map follows your live location until you drag the map. "Show my location" turns this on again.
 - "Edit" opens the form again and stops the journey. The current trip stays on the map until you plan a new trip or click "Clear".
 
 During the journey, a station popup has "Pick up here" and "Return here" buttons. They plan the trip again with this station:
@@ -125,7 +127,7 @@ Then open <http://localhost:8000>.
 
 Do not open `index.html` directly from disk (`file://`). Browsers do not load ES modules from disk, so the app does not start. Also, the browser then sends no `Referer` header, and the OpenStreetMap tile server blocks tile requests without it. Privacy extensions that strip the `Referer` cause the same problem. See <https://wiki.openstreetmap.org/wiki/Blocked_tiles>.
 
-"Use my location" needs `localhost` or HTTPS, because browsers allow geolocation only in a secure context.
+"Use my location" and "Show my location" need `localhost` or HTTPS, because browsers allow geolocation only in a secure context.
 
 The service worker (`sw.js`) also works only on `localhost` or HTTPS. It loads the app files from the network first, so code changes show on a normal reload. To test offline, use DevTools > Application > Service workers > Offline. If you serve other projects on the same `localhost` port, unregister the service worker there.
 
@@ -154,9 +156,9 @@ You can also run `node --test` directly.
 - `src/render.js`: HTML for the station and parking popups and the trip summary.
 - `src/map.js`: the Leaflet map, the map styles, the city bike network and the map layers.
 - `src/points.js`: the start and destination points, from map clicks and station popups.
-- `src/location.js`: "Use my location" and the live location dot.
+- `src/location.js`: "Use my location", "Show my location" (follow the location), and the live location dot.
 - `src/trip.js`: trip planning (Valenbisi and own bike).
-- `src/journey.js`: the journey: follow the location, refresh the stations, change a station. Also "Edit", "Clear" and "End journey".
+- `src/journey.js`: the journey: refresh the stations, change a station. Also "Edit", "Clear" and "End journey".
 - `sw.js`: the service worker. It keeps the app files for an offline start and never keeps live data. Add each new file in `src/` to `APP_FILES`.
 - `manifest.webmanifest`: app name, colours and icons.
 - `icons/`: `icon.svg` (the source and the favicon) and the PNG files made from it. To make them again on macOS, run `sips -s format png -z 512 512 icons/icon.svg --out icons/icon-512.png`, then the same command with 192. iOS keeps the old home screen icon until the user adds the app again.

@@ -346,11 +346,10 @@ body:not([data-mode="riding"]) .ride-actions,
 
 /* The action bar for each trip mode. Planning: the bike switch, and "Plan route" when
    both fields have text (picked or typed). Planned: "Edit" and "Start journey".
-   Riding: "Edit", "Follow me" and "End journey". */
+   Riding: "Edit" and "End journey". "Show my location" is on the map. */
 #plan-button,
 #edit-trip-button,
 #start-journey-button,
-#follow-button,
 #end-journey-button,
 body:not([data-mode="planning"]) .bike-choice {
   display: none;
@@ -363,7 +362,6 @@ body:not([data-mode="planning"]) .bike-choice {
 [data-mode="planned"] #edit-trip-button,
 [data-mode="planned"] #start-journey-button,
 [data-mode="riding"] #edit-trip-button,
-[data-mode="riding"] #follow-button,
 [data-mode="riding"] #end-journey-button {
   display: inline-flex;
   align-items: center;
@@ -727,6 +725,30 @@ a.station-card:hover {
     bold 10px system-ui,
     sans-serif;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* "Show my location" on the map: same size and border as the layer switcher above it. */
+.locate-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  background: #fff padding-box;
+  color: var(--ink);
+}
+
+.locate-control svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* Legend for the "City bike network" map layer. */

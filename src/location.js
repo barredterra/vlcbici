@@ -1,5 +1,6 @@
-// Geolocation: "Use my location" and the live location dot.
+// Geolocation: "Use my location" (the start), "Show my location" (follow), and the live location dot.
 
+import { STREET_ZOOM } from "./config.js";
 import { map, paddingOutsidePanel } from "./map.js";
 import { setStart } from "./points.js";
 import { clearMessage, showMessage } from "./panel.js";
@@ -9,6 +10,28 @@ import { state } from "./state.js";
 let liveLocationMarker = null;
 let liveLocationWatchId = null;
 
+// "Show my location" on the map, in every trip mode: the map follows the location
+// until the user drags it.
+export function showMyLocation() {
+  if (!navigator.geolocation) {
+    showMessage("Your browser does not support geolocation.", "error");
+    return;
+  }
+  watchLiveLocation(); // the user pressed a button, so a permission prompt is fine here
+  followLocation();
+}
+
+// Follow the live location at street level: the route overview is too far out to ride by.
+// A drag on the map stops it (main.js).
+export function followLocation() {
+  state.followingLocation = true;
+  const zoom = Math.max(map.getZoom(), STREET_ZOOM);
+  const here = livePosition();
+  if (here) panToLiveLocation([here.lat, here.lon], zoom);
+  else map.setZoom(zoom); // the first position update pans to the dot
+}
+
+// "Use my location" next to the start field: the location becomes the start.
 export function useMyLocation() {
   if (!navigator.geolocation) {
     showMessage("Your browser does not support geolocation.", "error");
@@ -64,7 +87,7 @@ export function watchLiveLocation() {
     function (err) {
       // Keep the last dot on short GPS gaps; remove it when the user revokes access.
       if (err.code !== err.PERMISSION_DENIED) return;
-      if (document.body.dataset.mode === "riding")
+      if (state.followingLocation)
         showMessage(
           "Location access is off. The map cannot follow you.",
           "info",

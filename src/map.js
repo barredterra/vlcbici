@@ -96,6 +96,26 @@ const layersControl = L.control
     "Bike network (City of Valencia)": cityLayer,
   })
   .addTo(map);
+
+// "Show my location", below the layer switcher, in every trip mode.
+// main.js connects it to showMyLocation() in src/location.js.
+// Icon from Lucide (ISC licence): "locate-fixed".
+const locateControl = L.control({ position: "topright" });
+locateControl.onAdd = function () {
+  const button = L.DomUtil.create("button", "leaflet-control locate-control");
+  button.id = "show-location-button";
+  button.type = "button";
+  button.title = "Show my location";
+  button.setAttribute("aria-label", "Show my location");
+  button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M2 12h3M19 12h3M12 2v3M12 19v3" />
+    <circle cx="12" cy="12" r="7" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>`;
+  L.DomEvent.disableClickPropagation(button); // a click must not pick a map point
+  return button;
+};
+locateControl.addTo(map);
 // These credits apply to all map styles.
 map.attributionControl.addAttribution(
   'Stations, bike network and bike parking: <a href="https://opendata.vlci.valencia.es/">Valencia Open Data</a>' +

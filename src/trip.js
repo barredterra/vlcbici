@@ -83,6 +83,7 @@ export async function planRoute(event) {
     drawLegs(plan.trip.legs);
     // Before fitBounds: the form closes, so the phone sheet gets shorter.
     setMode("planned");
+    state.followingLocation = false; // "Show my location" would pan away from the route
     map.fitBounds(routeLayer.getBounds(), paddingOutsidePanel());
     // The body can still be scrolled down from the form: bring the plan into view.
     tripCard.scrollIntoView({ block: "start" });

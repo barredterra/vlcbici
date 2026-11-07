@@ -1,12 +1,7 @@
 // The journey ("riding" mode): follow the live location, refresh the station counts,
 // and plan again with a station or parking spot picked in a popup.
 
-import {
-  MIN_BIKES,
-  MIN_DOCKS,
-  STATION_REFRESH_MS,
-  STREET_ZOOM,
-} from "./config.js";
+import { MIN_BIKES, MIN_DOCKS, STATION_REFRESH_MS } from "./config.js";
 import {
   chooseDropoffStation,
   choosePickupStation,
@@ -22,11 +17,7 @@ import {
   routeLayer,
   stationLayer,
 } from "./map.js";
-import {
-  livePosition,
-  panToLiveLocation,
-  watchLiveLocation,
-} from "./location.js";
+import { followLocation, livePosition, watchLiveLocation } from "./location.js";
 import {
   bikeLegs,
   bikeTrip,
@@ -97,16 +88,6 @@ export function clearAll() {
 function stopJourney() {
   clearInterval(stationRefreshTimer);
   state.followingLocation = false;
-}
-
-// Follow the live location (again, after a drag), at street level:
-// the route overview is too far out to ride by.
-export function followLocation() {
-  state.followingLocation = true;
-  const zoom = Math.max(map.getZoom(), STREET_ZOOM);
-  const here = livePosition();
-  if (here) panToLiveLocation([here.lat, here.lon], zoom);
-  else map.setZoom(zoom); // the first position update pans to the dot
 }
 
 // While riding, "Pick up here" and "Return here" in a station popup plan the trip again

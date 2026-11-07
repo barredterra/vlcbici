@@ -6,12 +6,15 @@ import { fetchStations } from "./api.js";
 import { STATION_REFRESH_MS } from "./config.js";
 import { drawStations, map, stationLayer } from "./map.js";
 import { onMapClick, onStationButtonClick } from "./points.js";
-import { useMyLocation, watchLiveLocationIfAllowed } from "./location.js";
+import {
+  showMyLocation,
+  useMyLocation,
+  watchLiveLocationIfAllowed,
+} from "./location.js";
 import { planRoute } from "./trip.js";
 import {
   clearAll,
   editTrip,
-  followLocation,
   onParkHereClick,
   onRideStationClick,
   startJourney,
@@ -34,14 +37,14 @@ document.getElementById("route-form").addEventListener("submit", planRoute);
 document
   .getElementById("locate-button")
   .addEventListener("click", useMyLocation);
+document
+  .getElementById("show-location-button")
+  .addEventListener("click", showMyLocation);
 document.getElementById("clear-button").addEventListener("click", clearAll);
 document
   .getElementById("start-journey-button")
   .addEventListener("click", startJourney);
 document.getElementById("edit-trip-button").addEventListener("click", editTrip);
-document
-  .getElementById("follow-button")
-  .addEventListener("click", followLocation);
 document
   .getElementById("end-journey-button")
   .addEventListener("click", clearAll);
