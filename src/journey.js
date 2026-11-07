@@ -42,6 +42,7 @@ import {
   startInput,
   summaryBox,
 } from "./panel.js";
+import { drawPoints } from "./points.js";
 import { state } from "./state.js";
 
 let stationRefreshTimer = null;
@@ -153,6 +154,8 @@ export async function onRideStationClick(event) {
 
 // With a planned own-bike trip, "Park here" in a parking popup plans the trip again
 // with that spot. Like "Return here", the ride still starts at the start.
+// A destination that is a parking spot ("Park here" before the plan) moves to the new spot.
+// Otherwise the walk to the destination starts at the new spot.
 export async function onParkHereClick(event) {
   const button = event.target.closest("[data-park-spot]");
   if (!button || document.body.dataset.mode === "planning") return;
@@ -163,10 +166,20 @@ export async function onParkHereClick(event) {
     return spot.id === spotId;
   });
 
+  let destination = trip.destination;
+  if (destination.parkingId) {
+    destination = {
+      lat: parking.lat,
+      lon: parking.lon,
+      label: destination.label,
+      parkingId: parking.id,
+    };
+  }
+
   showMessage("Planning the route with the new parking...", "info");
   let legs;
   try {
-    legs = await fetchLegs(ownBikeLegs(trip.start, parking, trip.destination));
+    legs = await fetchLegs(ownBikeLegs(trip.start, parking, destination));
   } catch (err) {
     if (state.currentTrip === trip) showMessage(err.message, "error"); // keep the old plan
     return;
@@ -178,10 +191,12 @@ export async function onParkHereClick(event) {
   state.currentTrip = ownBikeTrip(
     legs,
     trip.start,
-    trip.destination,
+    destination,
     parking,
     trip.parkingSpots,
   );
+  state.destPoint = destination; // for "Edit"
+  drawPoints(); // the B pin
   drawLegs(legs);
   renderSummary(state.currentTrip);
   clearMessage();

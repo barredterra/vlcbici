@@ -7,9 +7,17 @@ import { findStation } from "./stations.js";
 import { escapeHtml, pointText } from "./format.js";
 import { state } from "./state.js";
 
+// A tap on the map while a popup is open only closes the popup: it must not also set a point.
+// Leaflet closes the popup on "preclick". main.js adds this listener first, so it runs before.
+let popupWasOpen = false;
+export function onMapPreclick() {
+  popupWasOpen = document.querySelector(".leaflet-popup") !== null;
+}
+
 export function onMapClick(event) {
   if (document.body.dataset.mode !== "planning") return; // the form is hidden
   if (planButton.disabled) return; // a plan is running
+  if (popupWasOpen) return;
   const point = { lat: event.latlng.lat, lon: event.latlng.lng };
   // Fill the empty field; when both are filled, start again.
   const startEmpty = !startInput.value.trim();

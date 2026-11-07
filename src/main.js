@@ -5,7 +5,7 @@
 import { fetchStations } from "./api.js";
 import { STATION_REFRESH_MS } from "./config.js";
 import { drawStations, map, nearbyParkingLayer, stationLayer } from "./map.js";
-import { onMapClick, onStationButtonClick } from "./points.js";
+import { onMapClick, onMapPreclick, onStationButtonClick } from "./points.js";
 import {
   showMyLocation,
   useMyLocation,
@@ -29,6 +29,7 @@ import {
 } from "./panel.js";
 import { state } from "./state.js";
 
+map.on("preclick", onMapPreclick);
 map.on("click", onMapClick);
 document.addEventListener("click", onStationButtonClick);
 document.addEventListener("click", onRideStationClick);

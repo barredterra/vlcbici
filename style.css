@@ -722,10 +722,18 @@ a.station-card:hover {
 }
 
 /* Other bike parking near the destination (src/map.js): a small "P" sign. */
+.parking-spot-target {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .parking-spot {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 16px;
+  height: 16px;
   border: 1.5px solid #fff;
   border-radius: 3px;
   background: #1d4ed8;

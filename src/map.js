@@ -193,11 +193,13 @@ export function parkingMarker(spot) {
 }
 
 // Other parking near the destination: a small "P", below the route lines like the stations.
+// The marker is a 32px tap target around the 16px sign: a finger often misses a small sign,
+// and a miss sets a point on the map.
 export function parkingSpotMarker(spot) {
   const icon = L.divIcon({
-    className: "parking-spot",
-    html: "P",
-    iconSize: [16, 16],
+    className: "parking-spot-target",
+    html: '<span class="parking-spot">P</span>',
+    iconSize: [32, 32],
   });
   return L.marker([spot.lat, spot.lon], {
     icon: icon,
