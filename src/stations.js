@@ -34,14 +34,14 @@ export function choosePickupStation(stations, start, now) {
   const candidates = stations.filter(function (s) {
     return isStationLive(s, now) && s.bikes >= MIN_BIKES;
   });
-  return nearestStation(candidates, start);
+  return nearestPoint(candidates, start);
 }
 
 export function chooseDropoffStation(stations, destination, now) {
   const candidates = stations.filter(function (s) {
     return isStationLive(s, now) && s.docks >= MIN_DOCKS;
   });
-  return nearestStation(candidates, destination);
+  return nearestPoint(candidates, destination);
 }
 
 export function findStation(stations, id) {
@@ -60,17 +60,18 @@ export function shouldWalkOnly(start, destination, pickup, dropoff) {
 }
 
 export function isNearNetwork(stations, point) {
-  const closest = nearestStation(stations, point);
+  const closest = nearestPoint(stations, point);
   return haversineMeters(point, closest) <= MAX_DISTANCE_TO_NETWORK_M;
 }
 
-function nearestStation(stations, point) {
+// The item closest to point, or null for an empty list. Items need lat and lon.
+export function nearestPoint(items, point) {
   let best = null;
   let bestDistance = Infinity;
-  stations.forEach(function (station) {
-    const distance = haversineMeters(point, station);
+  items.forEach(function (item) {
+    const distance = haversineMeters(point, item);
     if (distance < bestDistance) {
-      best = station;
+      best = item;
       bestDistance = distance;
     }
   });

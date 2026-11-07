@@ -1,5 +1,5 @@
 // The journey ("riding" mode): follow the live location, refresh the station counts,
-// and plan again with a station picked in a popup.
+// and plan again with a station or parking spot picked in a popup.
 
 import {
   MIN_BIKES,
@@ -27,7 +27,13 @@ import {
   panToLiveLocation,
   watchLiveLocation,
 } from "./location.js";
-import { bikeLegs, bikeTrip, fetchLegs } from "./trip.js";
+import {
+  bikeLegs,
+  bikeTrip,
+  fetchLegs,
+  ownBikeLegs,
+  ownBikeTrip,
+} from "./trip.js";
 import {
   pickupCountLabel,
   renderSummary,
@@ -145,6 +151,42 @@ export async function onRideStationClick(event) {
   drawLegs(legs);
   renderSummary(state.currentTrip);
   showTripWarnings(state.currentTrip);
+}
+
+// With a planned own-bike trip, "Park here" in a parking popup plans the trip again
+// with that spot. Like "Return here", the ride still starts at the start.
+export async function onParkHereClick(event) {
+  const button = event.target.closest("[data-park-spot]");
+  if (!button || document.body.dataset.mode === "planning") return;
+  map.closePopup();
+  const trip = state.currentTrip;
+  const spotId = Number(button.dataset.parkSpot);
+  const parking = trip.parkingSpots.find(function (spot) {
+    return spot.id === spotId;
+  });
+
+  showMessage("Planning the route with the new parking...", "info");
+  let legs;
+  try {
+    legs = await fetchLegs(ownBikeLegs(trip.start, parking, trip.destination));
+  } catch (err) {
+    if (state.currentTrip === trip) showMessage(err.message, "error"); // keep the old plan
+    return;
+  }
+  // The journey can end, or another pick replace the trip, while the routes load.
+  if (state.currentTrip !== trip) return;
+
+  routeLayer.clearLayers();
+  state.currentTrip = ownBikeTrip(
+    legs,
+    trip.start,
+    trip.destination,
+    parking,
+    trip.parkingSpots,
+  );
+  drawLegs(legs);
+  renderSummary(state.currentTrip);
+  clearMessage();
 }
 
 // Load the station counts again and warn when the pickup or return station runs low.

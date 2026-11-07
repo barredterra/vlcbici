@@ -7,6 +7,10 @@ export const STATIONS_URL =
 export const BIKE_NETWORK_URL =
   "https://geoportal.valencia.es/server/rest/services/OPENDATA/Trafico/MapServer/189/query" +
   "?where=1=1&outFields=estado&outSR=4326&maxAllowableOffset=0.00001&f=geojson";
+// Public bike parking ("Aparcamientos Bicicletas"). api.js asks only for the spots near the
+// destination: the full list is about 800 kB.
+export const PARKING_URL =
+  "https://geoportal.valencia.es/server/rest/services/OPENDATA/Trafico/MapServer/206/query";
 export const FOOT_ROUTER_URL =
   "https://routing.openstreetmap.de/routed-foot/route/v1/driving/";
 export const BIKE_ROUTER_URL =
@@ -19,6 +23,10 @@ export const MIN_DOCKS = 3;
 export const MAX_STATION_AGE_MS = 2 * 60 * 60 * 1000;
 export const MAX_DISTANCE_TO_NETWORK_M = 2000; // farther from every station = outside the Valenbisi area
 export const MAX_SNAP_DISTANCE_M = 300; // farther from a road or path = point is not routable
+// Own bike: park at most this far from the destination. The data has no live counts, and
+// a spot with 2 spaces (one stand) is often full, so ask for 4 or more.
+export const MAX_PARKING_WALK_M = 300;
+export const MIN_PARKING_SPACES = 4;
 export const GEOCODER_INTERVAL_MS = 1000; // Nominatim policy: max 1 request per second
 export const VALENCIA_CENTER = [39.4699, -0.3763];
 // Opens the official app if installed (valenbisi.es is an app link on iOS and Android),

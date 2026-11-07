@@ -2,7 +2,7 @@
 
 # vlcbici
 
-A small static web app that plans a trip in Valencia with walking and Valenbisi bike sharing.
+A small static web app that plans a trip in Valencia with walking and Valenbisi bike sharing, or with your own bike.
 
 ![A planned trip across central Valencia, with walking and bike legs on the map and the trip summary with the "Start journey" and "Edit trip" buttons in the side panel](screenshot.png)
 
@@ -48,6 +48,21 @@ The app keeps a station that you picked, even if it has fewer than 3 bikes or fr
 
 Map clicks and the "Start" and "Destination" buttons work only while the form is open.
 
+## Own bike
+
+Above the form, choose "Valenbisi" or "My own bike". The app remembers this choice in your browser for the next visit.
+
+With "My own bike":
+
+1. The app looks for public bike parking with 4 or more spaces within 300 m of the destination. The data comes from the City of Valencia.
+2. It selects the parking spot nearest to the destination.
+3. It shows a ride from the start to the parking spot, then a walk to the destination.
+4. It also shows the other parking spots near the destination as small blue "P" signs. The data has no live counts, so the chosen spot can be full.
+
+If no parking spot is found, the app shows a ride to the destination and a message.
+
+The map does not show the Valenbisi stations and their legend while "My own bike" is selected. A station that you picked with the "Start" or "Destination" button counts as a normal point. The "outside the Valenbisi area" check does not apply.
+
 ## Start the journey
 
 After a plan, the form closes. The trip has two buttons:
@@ -82,6 +97,7 @@ When the app comes back after a minute or more in the background, it loads the s
 ## Data sources
 
 - Station availability: [Valenbisi disponibilidad, Valencia Open Data](https://opendata.vlci.valencia.es/en/dataset/valenbisi-disponibilitat-valenbisi-dsiponibilidad), loaded live from the city geoportal (GeoJSON).
+- Bike parking: [Aparcamientos Bicicletas, Valencia Open Data](https://opendata.vlci.valencia.es/dataset/aparcaments-bicicletes-aparcamientos-bicicletas), loaded live from the city geoportal (GeoJSON). The app asks only for the spots near the destination.
 - Map tiles: [OpenStreetMap](https://www.openstreetmap.org/copyright), © OpenStreetMap contributors.
 - "Cycling map (OpenStreetMap)" map style (switch with the layer button at the top right): [CyclOSM](https://www.cyclosm.org/), hosted by OpenStreetMap France. It shows bike lanes, cycle tracks and bike parking.
 - "Bike network (City of Valencia)" map style: [Itinerarios Ciclistas, Valencia Open Data](https://opendata.vlci.valencia.es/dataset/itinerarios-ciclistas-itineraris-ciclistes), drawn over the street map with a legend. It also marks sections closed for works. The app loads it (about 350 kB) only when you choose this map style.
@@ -124,14 +140,14 @@ You can also run `node --test` directly.
 - `src/config.js`: data URLs, limits and line styles.
 - `src/stations.js`: station data, distances and station selection. No DOM, no Leaflet.
 - `src/format.js`: text for distances, times, ages and directions. No DOM, no Leaflet.
-- `src/api.js`: network calls for stations, geocoding and routes.
+- `src/api.js`: network calls for stations, bike parking, geocoding and routes.
 - `src/state.js`: the app state that more than one module uses.
 - `src/panel.js`: the panel elements, the status message and the trip mode.
-- `src/render.js`: HTML for the station popups and the trip summary.
+- `src/render.js`: HTML for the station and parking popups and the trip summary.
 - `src/map.js`: the Leaflet map, the map styles, the city bike network and the map layers.
 - `src/points.js`: the start and destination points, from map clicks and station popups.
 - `src/location.js`: "Use my location" and the live location dot.
-- `src/trip.js`: trip planning and "Edit trip".
+- `src/trip.js`: trip planning (Valenbisi and own bike) and "Edit trip".
 - `src/journey.js`: the journey: follow the location, refresh the stations, change a station. Also "Clear" and "End journey".
 - `sw.js`: the service worker. It keeps the app files for an offline start and never keeps live data. Add each new file in `src/` to `APP_FILES`.
 - `manifest.webmanifest`: app name, colours and icons.
@@ -143,4 +159,4 @@ You can also run `node --test` directly.
 The code is under the [MIT License](LICENSE). It does not cover the data that the app loads:
 
 - Map data: © OpenStreetMap contributors, under the [ODbL](https://www.openstreetmap.org/copyright).
-- Station availability and bike network: Valencia Open Data, under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- Station availability, bike network and bike parking: Valencia Open Data, under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

@@ -1,15 +1,17 @@
-// vlcbici: route planner for Valencia (walk -> Valenbisi bike -> walk), in plain JavaScript.
+// vlcbici: route planner for Valencia (walk -> Valenbisi bike -> walk, or own bike -> walk),
+// in plain JavaScript.
 // This file connects the page events to the modules and starts the app.
 
 import { fetchStations } from "./api.js";
 import { STATION_REFRESH_MS } from "./config.js";
-import { drawStations, map } from "./map.js";
+import { drawStations, map, stationLayer } from "./map.js";
 import { onMapClick, onStationButtonClick } from "./points.js";
 import { useMyLocation, watchLiveLocationIfAllowed } from "./location.js";
 import { editTrip, planRoute } from "./trip.js";
 import {
   clearAll,
   followLocation,
+  onParkHereClick,
   onRideStationClick,
   startJourney,
 } from "./journey.js";
@@ -17,6 +19,8 @@ import {
   clearMessage,
   destInput,
   messageBox,
+  ownBikeInput,
+  routeForm,
   showMessage,
   startInput,
   toggleButton,
@@ -27,6 +31,7 @@ import { state } from "./state.js";
 map.on("click", onMapClick);
 document.addEventListener("click", onStationButtonClick);
 document.addEventListener("click", onRideStationClick);
+document.addEventListener("click", onParkHereClick);
 document.getElementById("route-form").addEventListener("submit", planRoute);
 document
   .getElementById("locate-button")
@@ -53,6 +58,29 @@ startInput.addEventListener("input", function () {
 destInput.addEventListener("input", function () {
   state.destPoint = null;
 });
+
+// Remember the bike choice for the next visit: people with their own bike use it every time.
+// Storage can be blocked (private mode). Then the choice starts at Valenbisi.
+const BIKE_CHOICE_KEY = "vlcbici-bike";
+try {
+  ownBikeInput.checked = localStorage.getItem(BIKE_CHOICE_KEY) === "own";
+} catch (err) {}
+showBikeChoice();
+routeForm.addEventListener("change", function (event) {
+  if (event.target.name !== "bike") return;
+  showBikeChoice();
+  try {
+    localStorage.setItem(BIKE_CHOICE_KEY, event.target.value);
+  } catch (err) {}
+});
+
+// With an own bike, the Valenbisi stations are noise: hide them and their legend.
+function showBikeChoice() {
+  const ownBike = ownBikeInput.checked;
+  document.body.dataset.bike = ownBike ? "own" : "valenbisi";
+  if (ownBike) stationLayer.remove();
+  else stationLayer.addTo(map);
+}
 
 // Show the station map right away; planning fetches fresh data again.
 // When a later load works, remove the old load error, but keep other messages.

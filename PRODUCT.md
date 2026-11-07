@@ -10,6 +10,8 @@ web
 
 Visitors and tourists in Valencia who use Valenbisi, the city's bike sharing service, usually with a short-term pass. They do not know the city or the station network. They use the app on a phone, outdoors, often one-handed, just before a trip or between two rides. Their job: get from where they are to where they want to go, with a bike for the middle part, without having to find out which stations have bikes or free docks.
 
+Secondary users: residents and visitors who ride their own bike. Their job: ride to public bike parking near the destination. They often know the city.
+
 ## Product Purpose
 
 vlcbici plans one trip from door to door: walk to a pickup station, ride, return the bike, walk to the destination. Success means the visitor reaches a station that really has a bike, rides, and finds a free dock at the end, with no guessing on the street.
@@ -29,6 +31,7 @@ The full door-to-door plan in one step. The app picks the pickup and return stat
 - Static site with no build step and no backend: `index.html`, `style.css`, native ES modules in `src/`, Leaflet 1.9.4 from a CDN.
 - Only public services: Valencia Open Data (station availability, city bike network), OpenStreetMap tiles, CyclOSM, FOSSGIS OSRM routing (foot and bike), Nominatim geocoding. Their usage policies apply (for example, at most one Nominatim request per second, no search while typing, `Referer` needed for OSM tiles).
 - Station rules: a station counts only when it is open and reported in the last 2 hours. Pickup needs 3+ bikes, return needs 3+ free docks. A station that the visitor picks is kept even below these counts, with a warning.
+- Own bike: ride to the nearest public bike parking with 4+ spaces within 300 m of the destination, then walk. The parking data has no live counts, so the other spots nearby are shown too. The Valenbisi stations are hidden in this mode.
 - Walk-only result when the bike does not help. Points more than 2 km from every station are outside the service area.
 - Installable web app (manifest and service worker). Without a connection only the app opens. The app never keeps station data, routes, geocoding results or map tiles.
 - UI language is English. No accounts, no stored personal data. Live location only after the visitor allows it.

@@ -39,6 +39,10 @@
           help, it shows only a walking route.
         </li>
         <li>
+          With your own bike, it plans a ride to public bike parking near your
+          destination and a short walk from there.
+        </li>
+        <li>
           During the ride, it checks the stations every minute and tells you
           when your pickup station runs out of bikes or your return station
           runs out of docks.
@@ -64,7 +68,8 @@
       </p>
       <p>
         To plan a trip, your browser sends the addresses that you type to the
-        Nominatim geocoder, and the start, stations and destination to the OSRM
+        Nominatim geocoder, the destination to the city geoportal to find bike
+        parking, and the start, stations and destination to the OSRM
         routing server. Map tiles come from OpenStreetMap. These are public
         community services. The app has no backend of its own: its web server
         only delivers the app files.
@@ -78,7 +83,7 @@
       <h2>Data</h2>
       <ul>
         <li>
-          Station availability and bike network:
+          Station availability, bike network and bike parking:
           <a
             href="https://opendata.vlci.valencia.es/en/dataset/valenbisi-disponibilitat-valenbisi-dsiponibilidad"
             >Valencia Open Data</a

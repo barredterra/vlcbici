@@ -5,8 +5,10 @@ export const state = {
   startPoint: null,
   destPoint: null,
 
-  // The last successful plan: { legs, start, destination, pickup, dropoff, pickupMarker,
-  // dropoffMarker }. Walk-only trips have no stations and no station markers (null).
+  // The last successful plan: { legs, origin, start, destination, pickup, dropoff,
+  // pickupMarker, dropoffMarker, parking, parkingSpots }. Walk-only and own-bike trips have
+  // no stations and no station markers (null). Only own-bike trips have parking: the chosen
+  // spot (can be null) and all spots near the destination.
   currentTrip: null,
 
   // The stations on the map, for the buttons in their popups.

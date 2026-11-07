@@ -6,6 +6,7 @@ import {
   haversineMeters,
   isNearNetwork,
   isStationLive,
+  nearestPoint,
   parseStations,
   shouldWalkOnly,
 } from "../src/stations.js";
@@ -121,4 +122,13 @@ test("isNearNetwork accepts points within 2 km of a station", function () {
   const stations = [station(1, 39.47, -0.376, 5, 5)];
   assert.equal(isNearNetwork(stations, { lat: 39.48, lon: -0.376 }), true);
   assert.equal(isNearNetwork(stations, { lat: 39.5, lon: -0.376 }), false);
+});
+
+test("nearestPoint returns the closest item, or null for none", function () {
+  const near = { spaces: 4, lat: 39.47, lon: -0.376 };
+  const far = { spaces: 10, lat: 39.48, lon: -0.376 };
+  const destination = { lat: 39.4701, lon: -0.376 };
+  assert.equal(nearestPoint([far, near], destination), near);
+  // No parking near the destination: the own-bike plan rides to the destination.
+  assert.equal(nearestPoint([], destination), null);
 });

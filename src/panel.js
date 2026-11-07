@@ -2,6 +2,7 @@
 
 export const startInput = document.getElementById("start-input");
 export const destInput = document.getElementById("dest-input");
+export const ownBikeInput = document.getElementById("own-bike-input");
 export const routeForm = document.getElementById("route-form");
 export const planButton = document.getElementById("plan-button");
 export const messageBox = document.getElementById("message");

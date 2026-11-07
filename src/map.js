@@ -12,7 +12,7 @@ import {
 } from "./config.js";
 import { isStationLive } from "./stations.js";
 import { fetchJson } from "./api.js";
-import { stationPopup } from "./render.js";
+import { PARKING_ICON, parkingPopup, stationPopup } from "./render.js";
 import { panel, showMessage } from "./panel.js";
 import { state } from "./state.js";
 
@@ -98,7 +98,7 @@ const layersControl = L.control
   .addTo(map);
 // These credits apply to all map styles.
 map.attributionControl.addAttribution(
-  'Stations and bike network: <a href="https://opendata.vlci.valencia.es/">Valencia Open Data</a>' +
+  'Stations, bike network and bike parking: <a href="https://opendata.vlci.valencia.es/">Valencia Open Data</a>' +
     ' | Routing: <a href="https://routing.openstreetmap.de/">FOSSGIS OSRM</a>',
 );
 
@@ -154,6 +154,33 @@ export function stationMarker(station, icon, role, countLabel) {
   return L.marker([station.lat, station.lon], options)
     .bindPopup(stationPopup(station, role), STATION_POPUP_OPTIONS)
     .bindTooltip(countLabel, STATION_COUNT_TOOLTIP_OPTIONS);
+}
+
+// The chosen bike parking: a pin like the return station, with its spaces next to it.
+export function parkingMarker(spot) {
+  const options = {
+    icon: pinIcon(`<span class="pin-icon">${PARKING_ICON}</span>`, "#c026d3"),
+    zIndexOffset: 1000,
+  };
+  return L.marker([spot.lat, spot.lon], options)
+    .bindPopup(parkingPopup(spot, "Bike parking"), STATION_POPUP_OPTIONS)
+    .bindTooltip(
+      `<span class="count-label">${spot.spaces} spaces</span>`,
+      STATION_COUNT_TOOLTIP_OPTIONS,
+    );
+}
+
+// Other parking near the destination: a small "P", below the route lines like the stations.
+export function parkingSpotMarker(spot) {
+  const icon = L.divIcon({
+    className: "parking-spot",
+    html: "P",
+    iconSize: [16, 16],
+  });
+  return L.marker([spot.lat, spot.lon], {
+    icon: icon,
+    pane: "stations",
+  }).bindPopup(parkingPopup(spot), STATION_POPUP_OPTIONS);
 }
 
 // A white outline under each line keeps it readable on busy map styles (CyclOSM).

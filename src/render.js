@@ -1,6 +1,11 @@
-// HTML for the station popups and the trip summary.
+// HTML for the station and parking popups and the trip summary.
 
-import { MIN_BIKES, MIN_DOCKS, VALENBISI_APP_URL } from "./config.js";
+import {
+  MIN_BIKES,
+  MIN_DOCKS,
+  MIN_PARKING_SPACES,
+  VALENBISI_APP_URL,
+} from "./config.js";
 import { isStationLive } from "./stations.js";
 import {
   escapeHtml,
@@ -71,8 +76,13 @@ export function renderSummary(trip) {
   });
 
   // The station cards frame the bike leg. A trip can lack the first or last walk.
+  // An own-bike trip has no stations, only a parking card after the ride, if a spot was found.
   const legsHtml = legs.map(function (leg) {
     if (leg.mode !== "bike") return legHtml(leg);
+    if (!pickup) {
+      const parkingHtml = trip.parking ? parkingCardHtml(trip.parking) : "";
+      return legHtml(leg) + parkingHtml;
+    }
     return (
       stationCardHtml(
         BIKE_ICON,
@@ -110,6 +120,26 @@ function endpointHtml(letter, kind, point) {
     <div class="endpoint ${kind}" title="${escapeHtml(name)}">
       <span class="ab-badge ${kind}" aria-hidden="true">${letter}</span>${escapeHtml(shortPlaceName(name))}
     </div>`;
+}
+
+// role: "Bike parking" on the chosen spot, empty on the other spots. Only the other
+// spots get "Park here", handled in onParkHereClick. style.css hides it while planning.
+export function parkingPopup(spot, role) {
+  const roleHtml = role ? `<div class="popup-role">${role}</div>` : "";
+  const actionsHtml = role
+    ? ""
+    : `<div class="popup-actions park-actions">
+        <button type="button" data-park-spot="${spot.id}">Park here</button>
+      </div>`;
+  return `
+    ${roleHtml}
+    <div class="popup-title">Public bike parking</div>
+    <div class="popup-sub">City of Valencia</div>
+    <div class="popup-stats">
+      ${popupStatHtml(PARKING_ICON, spot.spaces, "spaces", MIN_PARKING_SPACES)}
+    </div>
+    <div class="popup-status">No live data: the spaces can be full.</div>
+    ${actionsHtml}`;
 }
 
 // The open labels next to the pickup and return pins on the map.
@@ -152,6 +182,18 @@ function legHtml(leg) {
         <summary>Directions</summary>
         <ol>${steps.join("")}</ol>
       </details>
+    </div>`;
+}
+
+function parkingCardHtml(spot) {
+  return `
+    <div class="station-card">
+      <div class="station-icon">${PARKING_ICON}</div>
+      <div class="station-text">
+        <div class="station-action">Park the bike</div>
+        <div class="station-address">Public bike parking</div>
+      </div>
+      <div class="station-count">${spot.spaces} spaces</div>
     </div>`;
 }
 

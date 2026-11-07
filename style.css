@@ -119,6 +119,57 @@ body {
   margin-top: 0;
 }
 
+/* "Valenbisi" or "My own bike": two halves of one switch, the chosen one dark. */
+.bike-choice {
+  display: flex;
+  margin: 0 0 4px;
+  padding: 0;
+  border: 0;
+}
+
+.bike-choice legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.bike-choice label {
+  position: relative; /* holds the hidden radio */
+  flex: 1;
+  justify-content: center;
+  margin: 0;
+  padding: 7px 10px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.bike-choice label:first-of-type {
+  border-radius: 5px 0 0 5px;
+}
+
+.bike-choice label:last-of-type {
+  border-radius: 0 5px 5px 0;
+}
+
+.bike-choice label:has(input:checked) {
+  background: var(--ink);
+  color: #fff;
+}
+
+.bike-choice label:has(input:focus-visible) {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.bike-choice input {
+  position: absolute;
+  opacity: 0;
+}
+
 #panel.collapsed #panel-body {
   display: none;
 }
@@ -250,16 +301,20 @@ button:disabled {
 
 /* Trip modes: body data-mode is "planning", "planned" or "riding" (setMode in src/panel.js).
    The form and the Start/Destination popup buttons are only for planning, the
-   "Pick up here"/"Return here" popup buttons only for riding. While riding, only the
+   "Pick up here"/"Return here" popup buttons only for riding. "Park here" works with
+   a plan, before and during the ride. While riding, only the
    trip and the disclaimer stay, without the station legend. */
 body:not([data-mode="planning"]) #route-form,
 body:not([data-mode="planning"]) .plan-actions,
 body:not([data-mode="riding"]) .ride-actions,
-[data-mode="riding"] .station-legend {
+[data-mode="planning"] .park-actions,
+[data-mode="riding"] .station-legend,
+[data-bike="own"] .station-legend {
   display: none;
 }
 
-[data-mode="riding"] .disclaimer {
+[data-mode="riding"] .disclaimer,
+[data-bike="own"] .disclaimer {
   margin-top: 0;
 }
 
@@ -609,6 +664,19 @@ a.station-card:hover {
   text-align: right;
 }
 
+/* Other bike parking near the destination (src/map.js): a small "P" sign. */
+.parking-spot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #fff;
+  border-radius: 3px;
+  background: #1d4ed8;
+  color: #fff;
+  font: bold 10px system-ui, sans-serif;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
 /* Legend for the "City bike network" map layer. */
 .network-legend {
   padding: 6px 8px;
@@ -660,6 +728,7 @@ a.station-card:hover {
    so that iOS Safari does not zoom in when a field gets focus. */
 @media (pointer: coarse) {
   button,
+  .bike-choice label,
   input[type="text"] {
     min-height: 44px;
   }

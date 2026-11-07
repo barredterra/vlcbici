@@ -3,7 +3,10 @@
 import {
   GEOCODER_INTERVAL_MS,
   GEOCODER_URL,
+  MAX_PARKING_WALK_M,
   MAX_SNAP_DISTANCE_M,
+  MIN_PARKING_SPACES,
+  PARKING_URL,
   STATIONS_URL,
 } from "./config.js";
 import { parseStations } from "./stations.js";
@@ -22,22 +25,35 @@ export async function fetchJson(url) {
 }
 
 export async function fetchStations() {
-  let geojson;
-  try {
-    geojson = await fetchJson(STATIONS_URL);
-  } catch (err) {
-    throw new Error(
-      "Could not load Valenbisi station data (" + err.message + ").",
-    );
-  }
-  // The ArcGIS server reports query errors as HTTP 200 with an "error" body.
-  if (!geojson.features) {
-    const reason = geojson.error
-      ? geojson.error.message
-      : "unexpected response";
-    throw new Error("Could not load Valenbisi station data (" + reason + ").");
-  }
+  const geojson = await fetchGeoportal(STATIONS_URL, "Valenbisi station data");
   return parseStations(geojson);
+}
+
+// Public bike parking with enough spaces near a point: [{ id, spaces, lat, lon }, ...].
+export async function fetchParkingNear(point) {
+  const query = new URLSearchParams({
+    where: "numplazas >= " + MIN_PARKING_SPACES,
+    geometry: point.lon + "," + point.lat,
+    geometryType: "esriGeometryPoint",
+    inSR: "4326",
+    distance: MAX_PARKING_WALK_M,
+    units: "esriSRUnit_Meter",
+    outFields: "objectid,numplazas",
+    outSR: "4326",
+    f: "geojson",
+  });
+  const geojson = await fetchGeoportal(
+    PARKING_URL + "?" + query,
+    "bike parking data",
+  );
+  return geojson.features.map(function (feature) {
+    return {
+      id: feature.properties.objectid,
+      spaces: feature.properties.numplazas,
+      lat: feature.geometry.coordinates[1],
+      lon: feature.geometry.coordinates[0],
+    };
+  });
 }
 
 let lastGeocodeAt = 0;
@@ -114,6 +130,23 @@ export async function fetchRoute(routerUrl, from, to, legName) {
     coordinates: latLngs,
     steps: route.legs[0].steps,
   };
+}
+
+// The city geoportal (ArcGIS) reports query errors as HTTP 200 with an "error" body.
+async function fetchGeoportal(url, dataName) {
+  let geojson;
+  try {
+    geojson = await fetchJson(url);
+  } catch (err) {
+    throw new Error("Could not load " + dataName + " (" + err.message + ").");
+  }
+  if (!geojson.features) {
+    const reason = geojson.error
+      ? geojson.error.message
+      : "unexpected response";
+    throw new Error("Could not load " + dataName + " (" + reason + ").");
+  }
+  return geojson;
 }
 
 // Each browser has its own text for a failed fetch ("Failed to fetch", "Load failed").

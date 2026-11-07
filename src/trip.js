@@ -3,22 +3,27 @@
 import {
   BIKE_ROUTER_URL,
   FOOT_ROUTER_URL,
+  MAX_PARKING_WALK_M,
   MIN_BIKES,
   MIN_DOCKS,
+  MIN_PARKING_SPACES,
 } from "./config.js";
 import {
   chooseDropoffStation,
   choosePickupStation,
   findStation,
   isNearNetwork,
+  nearestPoint,
   shouldWalkOnly,
 } from "./stations.js";
-import { fetchRoute, fetchStations, geocode } from "./api.js";
+import { fetchParkingNear, fetchRoute, fetchStations, geocode } from "./api.js";
 import {
   drawLegs,
   drawStations,
   map,
   paddingOutsidePanel,
+  parkingMarker,
+  parkingSpotMarker,
   routeLayer,
   stationMarker,
 } from "./map.js";
@@ -35,6 +40,7 @@ import {
   clearMessage,
   destInput,
   messageBox,
+  ownBikeInput,
   planButton,
   routeForm,
   setFormDisabled,
@@ -67,93 +73,16 @@ export async function planRoute(event) {
       destInput.value,
       "destination",
     );
-    const start = state.startPoint;
-    const destination = state.destPoint;
     drawPoints();
 
-    const stations = await fetchStations();
-    drawStations(stations);
-    if (!isNearNetwork(stations, start))
-      throw new Error("The start is outside the Valenbisi area.");
-    if (!isNearNetwork(stations, destination))
-      throw new Error("The destination is outside the Valenbisi area.");
+    const plan = ownBikeInput.checked
+      ? await planOwnBikeTrip(state.startPoint, state.destPoint)
+      : await planValenbisiTrip(state.startPoint, state.destPoint);
+    state.currentTrip = plan.trip;
+    renderSummary(plan.trip);
+    if (plan.warnings.length) showMessage(plan.warnings.join(" "), "info");
 
-    // A station picked with its popup button wins over the nearest one.
-    const now = Date.now();
-    const pickup = start.stationId
-      ? findStation(stations, start.stationId)
-      : choosePickupStation(stations, start, now);
-    const dropoff = destination.stationId
-      ? findStation(stations, destination.stationId)
-      : chooseDropoffStation(stations, destination, now);
-    if (!pickup)
-      throw new Error(
-        "No open station with " + MIN_BIKES + "+ bikes available right now.",
-      );
-    if (!dropoff)
-      throw new Error(
-        "No open station with " + MIN_DOCKS + "+ free docks right now.",
-      );
-    if (start.stationId && destination.stationId && pickup.id === dropoff.id)
-      throw new Error("Start and destination are the same station.");
-
-    // Picked stations are the user's choice: warn about low counts, do not replace them.
-    const warnings = [];
-    if (start.stationId && pickup.bikes < MIN_BIKES)
-      warnings.push("The start station has only " + pickup.bikes + " bikes.");
-    if (destination.stationId && dropoff.docks < MIN_DOCKS)
-      warnings.push(
-        "The destination station has only " + dropoff.docks + " free docks.",
-      );
-
-    // From a start station, walk there from the live location, when it is known and nearby.
-    let origin = start;
-    if (start.stationId) {
-      const here = livePosition();
-      origin = here && isNearNetwork(stations, here) ? here : null;
-    }
-    const pickedStation = start.stationId || destination.stationId;
-    const walkOnly =
-      pickup.id === dropoff.id ||
-      (!pickedStation && shouldWalkOnly(start, destination, pickup, dropoff));
-
-    let legs;
-    if (walkOnly) {
-      const walkRoute = await fetchRoute(
-        FOOT_ROUTER_URL,
-        start,
-        destination,
-        "the walk",
-      );
-      legs = [{ mode: "walk", title: "Walk to destination", route: walkRoute }];
-      warnings.push(
-        "Walking directly is shorter than walking to and from the Valenbisi stations.",
-      );
-      state.currentTrip = {
-        legs: legs,
-        origin: start,
-        start: start,
-        destination: destination,
-        pickup: null,
-        dropoff: null,
-        pickupMarker: null,
-        dropoffMarker: null,
-      };
-    } else {
-      legs = await fetchLegs(bikeLegs(origin, pickup, dropoff, destination));
-      state.currentTrip = bikeTrip(
-        legs,
-        origin,
-        start,
-        destination,
-        pickup,
-        dropoff,
-      );
-    }
-    renderSummary(state.currentTrip);
-    if (warnings.length) showMessage(warnings.join(" "), "info");
-
-    drawLegs(legs);
+    drawLegs(plan.trip.legs);
     // Before fitBounds: the form closes, so the phone sheet gets shorter.
     setMode("planned");
     map.fitBounds(routeLayer.getBounds(), paddingOutsidePanel());
@@ -166,6 +95,101 @@ export async function planRoute(event) {
     setFormDisabled(false);
     planButton.textContent = "Plan route";
   }
+}
+
+// Walk to a station with bikes, ride, return the bike at a station with docks, walk.
+// Returns { trip, warnings }.
+async function planValenbisiTrip(start, destination) {
+  const stations = await fetchStations();
+  drawStations(stations);
+  if (!isNearNetwork(stations, start))
+    throw new Error("The start is outside the Valenbisi area.");
+  if (!isNearNetwork(stations, destination))
+    throw new Error("The destination is outside the Valenbisi area.");
+
+  // A station picked with its popup button wins over the nearest one.
+  const now = Date.now();
+  const pickup = start.stationId
+    ? findStation(stations, start.stationId)
+    : choosePickupStation(stations, start, now);
+  const dropoff = destination.stationId
+    ? findStation(stations, destination.stationId)
+    : chooseDropoffStation(stations, destination, now);
+  if (!pickup)
+    throw new Error(
+      "No open station with " + MIN_BIKES + "+ bikes available right now.",
+    );
+  if (!dropoff)
+    throw new Error(
+      "No open station with " + MIN_DOCKS + "+ free docks right now.",
+    );
+  if (start.stationId && destination.stationId && pickup.id === dropoff.id)
+    throw new Error("Start and destination are the same station.");
+
+  // Picked stations are the user's choice: warn about low counts, do not replace them.
+  const warnings = [];
+  if (start.stationId && pickup.bikes < MIN_BIKES)
+    warnings.push("The start station has only " + pickup.bikes + " bikes.");
+  if (destination.stationId && dropoff.docks < MIN_DOCKS)
+    warnings.push(
+      "The destination station has only " + dropoff.docks + " free docks.",
+    );
+
+  // From a start station, walk there from the live location, when it is known and nearby.
+  let origin = start;
+  if (start.stationId) {
+    const here = livePosition();
+    origin = here && isNearNetwork(stations, here) ? here : null;
+  }
+  const pickedStation = start.stationId || destination.stationId;
+  const walkOnly =
+    pickup.id === dropoff.id ||
+    (!pickedStation && shouldWalkOnly(start, destination, pickup, dropoff));
+
+  if (!walkOnly) {
+    const legs = await fetchLegs(
+      bikeLegs(origin, pickup, dropoff, destination),
+    );
+    const trip = bikeTrip(legs, origin, start, destination, pickup, dropoff);
+    return { trip: trip, warnings: warnings };
+  }
+
+  const walkRoute = await fetchRoute(
+    FOOT_ROUTER_URL,
+    start,
+    destination,
+    "the walk",
+  );
+  const legs = [
+    { mode: "walk", title: "Walk to destination", route: walkRoute },
+  ];
+  warnings.push(
+    "Walking directly is shorter than walking to and from the Valenbisi stations.",
+  );
+  return {
+    trip: tripWithoutStations(legs, start, destination),
+    warnings,
+  };
+}
+
+// Own bike: ride to public bike parking near the destination, then walk.
+// Without parking nearby, ride to the destination. Station points count as plain points.
+async function planOwnBikeTrip(start, destination) {
+  const spots = await fetchParkingNear(destination);
+  const parking = nearestPoint(spots, destination);
+  const legs = await fetchLegs(ownBikeLegs(start, parking, destination));
+  const warnings = [];
+  if (!parking) {
+    warnings.push(
+      "No public bike parking with " +
+        MIN_PARKING_SPACES +
+        "+ spaces within " +
+        MAX_PARKING_WALK_M +
+        " m of the destination.",
+    );
+  }
+  const trip = ownBikeTrip(legs, start, destination, parking, spots);
+  return { trip: trip, warnings: warnings };
 }
 
 export function editTrip() {
@@ -246,6 +270,71 @@ export function bikeTrip(legs, origin, start, destination, pickup, dropoff) {
     dropoff: dropoff,
     pickupMarker: pickupMarker,
     dropoffMarker: dropoffMarker,
+    parking: null,
+    parkingSpots: [],
+  };
+}
+
+// Ride to the parking spot, then walk. Without a spot, ride to the destination.
+export function ownBikeLegs(start, parking, destination) {
+  if (!parking) {
+    return [
+      {
+        mode: "bike",
+        title: "Ride to destination",
+        router: BIKE_ROUTER_URL,
+        from: start,
+        to: destination,
+        name: "the bike ride",
+      },
+    ];
+  }
+  return [
+    {
+      mode: "bike",
+      title: "Ride to bike parking",
+      router: BIKE_ROUTER_URL,
+      from: start,
+      to: parking,
+      name: "the bike ride",
+    },
+    {
+      mode: "walk",
+      title: "Walk to destination",
+      router: FOOT_ROUTER_URL,
+      from: parking,
+      to: destination,
+      name: "the walk to the destination",
+    },
+  ];
+}
+
+// Adds the parking pin and the other spots to the route layer and returns the trip.
+// The data has no live counts: show the other spots too, in case the chosen one is full.
+export function ownBikeTrip(legs, start, destination, parking, spots) {
+  spots.forEach(function (spot) {
+    if (spot !== parking) parkingSpotMarker(spot).addTo(routeLayer);
+  });
+  if (parking) parkingMarker(parking).addTo(routeLayer);
+  const trip = tripWithoutStations(legs, start, destination);
+  trip.parking = parking;
+  trip.parkingSpots = spots;
+  return trip;
+}
+
+// A walk-only or own-bike trip. The journey skips the station refresh for it.
+function tripWithoutStations(legs, start, destination) {
+  return {
+    legs: legs,
+    origin: start,
+    start: start,
+    destination: destination,
+    pickup: null,
+    dropoff: null,
+    pickupMarker: null,
+    dropoffMarker: null,
+    parking: null,
+    parkingSpots: [],
   };
 }
 
